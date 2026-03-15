@@ -234,20 +234,27 @@ function LogoAnimation({ isDarkMode = true, onClick, cardWidth = DEFAULT_CARD_WI
     if (!canvasRef.current) return;
     
     // If not loaded or showing placeholder, just return but render canvas
+    const dpr = window.devicePixelRatio || 1;
+
     if (!isLoaded || showPlaceholder) {
-      // Still render a canvas even if not animating
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
-      canvas.width = 500;
-      canvas.height = 500;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.width = Math.round(LOGO_SIZE * dpr);
+      canvas.height = Math.round(LOGO_SIZE * dpr);
+      canvas.style.width = `${LOGO_SIZE}px`;
+      canvas.style.height = `${LOGO_SIZE}px`;
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, LOGO_SIZE, LOGO_SIZE);
       return;
     }
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    canvas.width = 500;
-    canvas.height = 500;
+    canvas.width = Math.round(LOGO_SIZE * dpr);
+    canvas.height = Math.round(LOGO_SIZE * dpr);
+    canvas.style.width = `${LOGO_SIZE}px`;
+    canvas.style.height = `${LOGO_SIZE}px`;
+    ctx.scale(dpr, dpr);
 
     const drawLogoFrame = (frameIndex) => {
       const imageSet = imagesRef.current[currentThemePrefix];
@@ -255,7 +262,7 @@ function LogoAnimation({ isDarkMode = true, onClick, cardWidth = DEFAULT_CARD_WI
       const fallbackFrame = imageSet[lastRenderedFrameRef.current.logo];
 
       if (frame || fallbackFrame) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, LOGO_SIZE, LOGO_SIZE);
         ctx.drawImage(frame || fallbackFrame, 0, 0, LOGO_SIZE, LOGO_SIZE);
         if (frame) {
           lastRenderedFrameRef.current.logo = frameIndex;
@@ -266,25 +273,25 @@ function LogoAnimation({ isDarkMode = true, onClick, cardWidth = DEFAULT_CARD_WI
     const drawArlequinFrame = (frameIndex) => {
       const arlequinSet = arlequinImagesRef.current[currentThemePrefix];
       
-      // Calculate centered position for card
-      const x = (canvas.width - cardWidth) / 2;
-      const y = (canvas.height - cardHeight) / 2;
-      
+      // Calculate centered position for card (logical coords)
+      const x = (LOGO_SIZE - cardWidth) / 2;
+      const y = (LOGO_SIZE - cardHeight) / 2;
+
       // If animation is complete, draw final frame
       if (isArlequinCompleteRef.current) {
         const finalFrame = arlequinSet.finalFrame;
         if (finalFrame) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.clearRect(0, 0, LOGO_SIZE, LOGO_SIZE);
           ctx.drawImage(finalFrame, x, y, cardWidth, cardHeight);
         }
         return;
       }
-      
+
       // Draw animation frame (con fallback al último frame válido)
       const frame = arlequinSet.frames[frameIndex];
       const fallbackFrame = arlequinSet.frames[lastRenderedFrameRef.current.arlequin];
       if (frame || fallbackFrame) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, LOGO_SIZE, LOGO_SIZE);
         ctx.drawImage(frame || fallbackFrame, x, y, cardWidth, cardHeight);
         if (frame) {
           lastRenderedFrameRef.current.arlequin = frameIndex;

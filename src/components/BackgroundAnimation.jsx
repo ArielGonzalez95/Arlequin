@@ -32,8 +32,9 @@ function BackgroundAnimation({ isDarkMode = true }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
+    const dpr = window.devicePixelRatio || 1;
+    const canvasWidth = canvas.width / dpr;
+    const canvasHeight = canvas.height / dpr;
 
     // Generate fixed number of stars avoiding button area
     const stars = [];
@@ -117,9 +118,11 @@ function BackgroundAnimation({ isDarkMode = true }) {
     const handleResize = () => {
       const canvas = canvasRef.current;
       if (canvas) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        // Regenerate stars on resize
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(window.innerWidth * dpr);
+        canvas.height = Math.round(window.innerHeight * dpr);
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
         generateStars();
       }
     };
@@ -140,9 +143,12 @@ function BackgroundAnimation({ isDarkMode = true }) {
     const ctx = canvas.getContext('2d');
 
     const drawStars = () => {
-      // Clear canvas with background color
+      const dpr = window.devicePixelRatio || 1;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const logicalW = canvas.width / dpr;
+      const logicalH = canvas.height / dpr;
       ctx.fillStyle = isDarkMode ? '#000000' : '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, logicalW, logicalH);
 
       const currentFrameIndex = currentFrameRef.current;
       const stars = starsRef.current;
