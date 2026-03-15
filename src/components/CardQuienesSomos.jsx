@@ -67,9 +67,12 @@ const CLOSE_FRAMES_DARK = [
   '00023_arlequin_dorso_dark.avif',
 ];
 
-const CARD_FRAME_DURATION = 30;
+const CARD_FRAME_DURATION = 40;
 const CARD_WIDTH = 550;
 const CARD_HEIGHT = 680;
+
+const _openCache  = {};
+const _closeCache = {};
 
 // 4 pages: 0-1 photos, 2-3 text
 const PAGES = [
@@ -164,6 +167,26 @@ function CardQuienesSomos({ isDarkMode, onClose, fromGrid = false }) {
     const themeCloseFrames = isDarkMode ? CLOSE_FRAMES_DARK : CLOSE_FRAMES_CLEAR;
 
     const loadImages = async () => {
+      const themeKey = isDarkMode ? 'dark' : 'clear';
+
+      if (_openCache[themeKey]) {
+        imagesRef.current = _openCache[themeKey];
+        closeImagesRef.current = _closeCache[themeKey];
+        if (!wasLoaded) {
+          isLoadedRef.current = true;
+          setIsLoaded(true);
+        } else if (isCompleteRef.current) {
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext('2d');
+          const finalFrame = _openCache[themeKey][_openCache[themeKey].length - 1];
+          if (finalFrame) {
+            ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+            ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
+          }
+        }
+        return;
+      }
+
       const openPromises = [...cardFrames, CARD_FINAL_FRAME].map(file =>
         new Promise(resolve => {
           const img = new Image();
@@ -187,14 +210,15 @@ function CardQuienesSomos({ isDarkMode, onClose, fromGrid = false }) {
         Promise.all(closePromises),
       ]);
 
-      imagesRef.current = openResults;
+      _openCache[themeKey]   = openResults;
+      _closeCache[themeKey]  = closeResults;
+      imagesRef.current      = openResults;
       closeImagesRef.current = closeResults;
 
       if (!wasLoaded) {
         isLoadedRef.current = true;
         setIsLoaded(true);
       } else if (isCompleteRef.current) {
-        // Animation already done: redraw final frame with new theme
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const finalFrame = openResults[openResults.length - 1];
@@ -203,7 +227,6 @@ function CardQuienesSomos({ isDarkMode, onClose, fromGrid = false }) {
           ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
         }
       }
-      // If mid-animation: the running loop reads imagesRef.current automatically
     };
 
     loadImages();

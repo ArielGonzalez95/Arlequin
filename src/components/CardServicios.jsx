@@ -65,9 +65,12 @@ const CLOSE_FRAMES_DARK = [
 const CARD_FINAL_FRAME_CLEAR = '00012_arlequin_frente_clear_fija.avif';
 const CARD_FINAL_FRAME_DARK   = '00012_arlequin_frente_dark_fija.avif';
 
-const CARD_FRAME_DURATION = 30;
+const CARD_FRAME_DURATION = 40;
 const CARD_WIDTH  = 550;
 const CARD_HEIGHT = 680;
+
+const _openCache  = {};
+const _closeCache = {};
 
 // ── 7 páginas de contenido ────────────────────────────────────────
 const page1Lines = [
@@ -205,6 +208,26 @@ function CardServicios({ isDarkMode, onClose, fromGrid = false }) {
     const wasLoaded = isLoadedRef.current;
 
     const loadImages = async () => {
+      const themeKey = isDarkMode ? 'dark' : 'clear';
+
+      if (_openCache[themeKey]) {
+        imagesRef.current = _openCache[themeKey];
+        closeImagesRef.current = _closeCache[themeKey];
+        if (!wasLoaded) {
+          isLoadedRef.current = true;
+          setIsLoaded(true);
+        } else if (isCompleteRef.current) {
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext('2d');
+          const finalFrame = _openCache[themeKey][_openCache[themeKey].length - 1];
+          if (finalFrame) {
+            ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+            ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
+          }
+        }
+        return;
+      }
+
       const openPromises = [...cardFrames, cardFinalFrame].map(file =>
         new Promise(resolve => {
           const img = new Image();
@@ -225,6 +248,9 @@ function CardServicios({ isDarkMode, onClose, fromGrid = false }) {
         Promise.all(openPromises),
         Promise.all(closePromises),
       ]);
+
+      _openCache[themeKey]   = openResults;
+      _closeCache[themeKey]  = closeResults;
       imagesRef.current      = openResults;
       closeImagesRef.current = closeResults;
 
@@ -232,7 +258,6 @@ function CardServicios({ isDarkMode, onClose, fromGrid = false }) {
         isLoadedRef.current = true;
         setIsLoaded(true);
       } else if (isCompleteRef.current) {
-        // Animation already done: redraw final frame with new theme
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const finalFrame = openResults[openResults.length - 1];
@@ -241,7 +266,6 @@ function CardServicios({ isDarkMode, onClose, fromGrid = false }) {
           ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
         }
       }
-      // If mid-animation: the running loop reads imagesRef.current automatically
     };
     loadImages();
   }, [isDarkMode]);
