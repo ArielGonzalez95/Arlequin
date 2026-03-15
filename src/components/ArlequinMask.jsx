@@ -99,7 +99,9 @@ function ArlequinMask({ isDarkMode, phase, onTransitionEnd }) {
   }, [phase]);
 
   const handleTransitionEnd = (e) => {
-    if (e?.propertyName !== 'transform' || !onTransitionEnd) return;
+    const prop = e?.propertyName;
+    if (prop !== 'transform' && prop !== '-webkit-transform') return;
+    if (!onTransitionEnd) return;
 
     // Handle all mask transition phases
     if (phase === 'maskOpening' || phase === 'maskClosing' || phase === 'reverseClosing' || phase === 'reverseOpening') {
