@@ -34,8 +34,8 @@ const CARD_FRAMES_BLACK = [
   '00012_arlequin_contacto_black.avif',
 ];
 
-const CARD_FINAL_FRAME_CLEAR = '00012_arlequin_contacto_clear.avif';
-const CARD_FINAL_FRAME_BLACK  = '00012_arlequin_contacto_black.avif';
+const CARD_FINAL_FRAME_CLEAR = 'arlequin_contacto_clear_boton.avif';
+const CARD_FINAL_FRAME_BLACK  = 'arlequin_contacto_dark_boton.avif';
 
 const CLOSE_FRAMES_CLEAR = [
   '00013_arlequin_contacto_clear.avif',
@@ -359,11 +359,6 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
 
           <div className="contacto-send-area">
             <button className="contacto-send-btn" onClick={handleEnviar}>Enviar</button>
-            <img
-              src="/Cartas/arlequin_pieza_fondo-boton-enviar.avif"
-              alt=""
-              className="contacto-send-bg"
-            />
           </div>
         </>
       )}

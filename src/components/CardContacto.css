@@ -4,12 +4,13 @@
    Positioned to sit over the napkin in the 00012 contacto image.
    Adjust top/right/width once you see it over the actual frame.
    ──────────────────────────────────────────────────────────────── */
+/* ── Ajustá --contacto-form-rotation para rotar el formulario ── */
 .contacto-form {
   position: absolute;
   top: 38%;
   right: 8%;
   width: 180px;
-  transform: rotate(-4deg);
+  transform: rotate(var(--contacto-form-rotation, -4deg));
   transform-origin: top left;
   background: transparent;
   box-shadow: none;
@@ -80,26 +81,16 @@
   overflow: hidden;
 }
 
-/* ── Send button — bottom-right dark corner of the card ────────── */
+/* ── Send button — esquina inferior derecha de la imagen final ── */
 .contacto-send-area {
   position: absolute;
-  bottom: 115px;
-  left: 135px;
+  bottom: 28px;
+  right: 28px;
   z-index: 10;
   animation: fade-in 0.5s ease-out 0.3s both;
 }
 
-.contacto-send-bg {
-  display: block;
-  width: 150px;
-  height: auto;
-}
-
 .contacto-send-btn {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   background: transparent;
   border: none;
   cursor: pointer;
