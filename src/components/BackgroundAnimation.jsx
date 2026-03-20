@@ -11,7 +11,7 @@ const FRAME_PATH_CLEAR = '/estrellas/estrella_giro_clear_';
 const FRAME_PATH_DARK = '/estrellas/estrella_giro_dark_';
 
 // Fixed star positions as [x%, y%] of viewport.
-// Distributed around the edges; the center is kept clear for the logo/mask.
+// Outer ring hugs the edges; inner diagonals fill the gap without reaching the logo/mask.
 const STAR_POSITIONS_DESKTOP = [
   // Top edge
   [12,  8], [35,  5], [50,  6], [65,  5], [88,  8],
@@ -21,14 +21,19 @@ const STAR_POSITIONS_DESKTOP = [
   [ 4, 78], [96, 78],
   // Bottom edge
   [12, 92], [35, 95], [65, 95], [88, 92],
+  // Inner diagonals — closer to center but clear of the logo (~250px radius)
+  [28, 28], [72, 28],
+  [28, 72], [72, 72],
 ];
 
 // Mobile: logo fills most of the width, so stars live in the top/bottom strips
-// and extreme corners — 9 total.
+// and extreme corners — 11 total.
 const STAR_POSITIONS_MOBILE = [
   // Top strip
   [ 8,  6], [50,  5], [92,  6],
   [15, 15],           [85, 15],
+  // Inner diagonals (above/below logo center)
+  [25, 26],           [75, 26],
   // Bottom strip
   [ 5, 88], [95, 88],
   [28, 95],           [72, 95],
