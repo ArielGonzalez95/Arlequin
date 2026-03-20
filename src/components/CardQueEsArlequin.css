@@ -232,7 +232,7 @@
 /* 1229×692 — notebook at 125% (1536×864 physical) */
 @media (max-height: 780px) and (min-width: 501px) {
   .card-que-es-arlequin {
-    transform: scale(0.87);
+    transform: scale(0.80);
     transform-origin: center center;
   }
 }
