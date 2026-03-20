@@ -1,0 +1,8 @@
+{
+  "routes": [
+    { "src": "^/$", "dest": "/SitioEnConstruccion/index.html" },
+    { "handle": "filesystem" },
+    { "src": "^/arlequin(/.*)?$", "dest": "/index.html" },
+    { "src": "^/(.*)$", "dest": "/SitioEnConstruccion/index.html" }
+  ]
+}
