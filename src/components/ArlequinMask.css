@@ -52,6 +52,31 @@
 }
 
 /* Responsive adjustments */
+
+/* Medium screens: tablets landscape, small laptops (601–900px wide) */
+@media (max-width: 900px) and (min-width: 601px) {
+  .arlequin-mask {
+    width: 360px;
+    height: 370px;
+  }
+}
+
+/* Short screens: 1366×768 @ 125% → 614px CSS height */
+@media (max-height: 650px) and (min-width: 601px) {
+  .arlequin-mask {
+    width: 340px;
+    height: 310px;
+  }
+}
+
+@media (max-height: 580px) and (min-width: 601px) {
+  .arlequin-mask {
+    width: 300px;
+    height: 280px;
+  }
+}
+
+/* Small mobile (≤ 600px) */
 @media (max-width: 600px) {
   .arlequin-mask {
     width: 330px;

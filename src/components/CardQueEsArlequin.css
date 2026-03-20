@@ -216,11 +216,58 @@
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
-/* ── Mobile responsive ────────────────────────────────────────────
+/* ── Responsive ──────────────────────────────────────────────────
    Scale the entire component so every absolute-positioned child
    (canvas, title, text, nav buttons) shrinks proportionally.
    transform-origin: center so it stays centered inside mask-content.
    ──────────────────────────────────────────────────────────────── */
+
+/* Short desktop/laptop screens
+   Calibrated against common viewport heights after Windows DPI scaling:
+   - 1536×864 @ 125% → 1229×692px CSS  ← most common notebook
+   - 1366×768 @ 125% → 1093×614px CSS
+   - 1280×720 @ 100% → 1280×720px CSS
+*/
+
+/* 1229×692 — notebook at 125% (1536×864 physical) */
+@media (max-height: 780px) and (min-width: 501px) {
+  .card-que-es-arlequin {
+    transform: scale(0.87);
+    transform-origin: center center;
+  }
+}
+
+/* 1093×614 — notebook at 125% (1366×768 physical) */
+@media (max-height: 650px) and (min-width: 501px) {
+  .card-que-es-arlequin {
+    transform: scale(0.80);
+    transform-origin: center center;
+  }
+}
+
+/* Very short screens (netbooks, split-screen, etc.) */
+@media (max-height: 580px) and (min-width: 501px) {
+  .card-que-es-arlequin {
+    transform: scale(0.72);
+    transform-origin: center center;
+  }
+}
+
+/* Tablet portrait / small screens between 501-768px wide */
+@media (max-width: 768px) and (min-width: 501px) {
+  .card-que-es-arlequin {
+    transform: scale(0.95);
+    transform-origin: center center;
+  }
+}
+
+/* Tablet portrait + short height combined */
+@media (max-width: 768px) and (max-height: 780px) and (min-width: 501px) {
+  .card-que-es-arlequin {
+    transform: scale(0.85);
+    transform-origin: center center;
+  }
+}
 
 /* Large mobile / small tablet (≤ 500px) */
 @media (max-width: 500px) {
@@ -229,7 +276,7 @@
     height: 680px !important;
   }
   .card-que-es-arlequin {
-    transform: scale(1.05);
+    transform: scale(1.0);
     transform-origin: center center;
   }
 }

@@ -70,3 +70,54 @@
   box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
 }
 
+/* ── Responsive logo scaling ─────────────────────────────────────
+   The canvas is drawn at 500px; CSS transform scales the container
+   and canvas together without modifying the render pipeline.
+   ──────────────────────────────────────────────────────────────── */
+
+/* Notebook at 125% DPI (1536×864 phys → 1229×692 CSS) */
+@media (max-height: 780px) and (min-width: 501px) {
+  .logo-container {
+    transform: translate(-50%, -50%) scale(0.86);
+  }
+}
+
+/* Short screen: 1366×768 @ 125% → 1093×614 CSS */
+@media (max-height: 650px) and (min-width: 501px) {
+  .logo-container {
+    transform: translate(-50%, -50%) scale(0.76);
+  }
+}
+
+@media (max-height: 580px) and (min-width: 501px) {
+  .logo-container {
+    transform: translate(-50%, -50%) scale(0.68);
+  }
+}
+
+/* Tablet portrait (501–768px wide) */
+@media (max-width: 768px) and (min-width: 501px) {
+  .logo-container {
+    transform: translate(-50%, -50%) scale(0.88);
+  }
+}
+
+/* Mobile (≤ 500px): 500px logo overflows small viewports */
+@media (max-width: 500px) {
+  .logo-container {
+    transform: translate(-50%, -50%) scale(0.78);
+  }
+}
+
+@media (max-width: 390px) {
+  .logo-container {
+    transform: translate(-50%, -50%) scale(0.68);
+  }
+}
+
+@media (max-width: 360px) {
+  .logo-container {
+    transform: translate(-50%, -50%) scale(0.62);
+  }
+}
+

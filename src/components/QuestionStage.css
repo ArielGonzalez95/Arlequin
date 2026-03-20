@@ -85,17 +85,40 @@
   }
 }
 
+/* Short desktop screens — fires from 1229×692 (notebook 125%) downward */
+@media (max-height: 780px) and (min-width: 601px) {
+  .question-text {
+    font-size: 26px;
+  }
+  .question-stage {
+    gap: 22px;
+  }
+}
+
+@media (max-height: 650px) and (min-width: 601px) {
+  .question-text {
+    font-size: 22px;
+  }
+  .question-stage {
+    gap: 16px;
+  }
+  .question-btn {
+    font-size: 18px;
+    padding: 8px 28px;
+  }
+}
+
 /* Mobile responsive */
 @media (max-width: 600px) {
   .question-text {
     font-size: 24px;
     line-height: 1.4;
   }
-  
+
   .question-buttons {
     gap: 30px;
   }
-  
+
   .question-btn {
     font-size: 20px;
     padding: 10px 30px;

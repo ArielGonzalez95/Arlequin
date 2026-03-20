@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import emailjs from '@emailjs/browser';
+import contactConfig from '../config/contact.json';
 import './CardQueEsArlequin.css';
 import './CardContacto.css';
 
@@ -93,6 +95,9 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
   const [telefono,          setTelefono]          = useState('');
   const [descripcion,       setDescripcion]       = useState('');
   const [isScalingDown,     setIsScalingDown]     = useState(false);
+  const [enviando,          setEnviando]          = useState(false);
+  const [enviado,           setEnviado]           = useState(false);
+  const [errorEnvio,        setErrorEnvio]        = useState(false);
 
   const cardFrames     = isDarkMode ? CARD_FRAMES_BLACK   : CARD_FRAMES_CLEAR;
   const closeFrames    = isDarkMode ? CLOSE_FRAMES_BLACK  : CLOSE_FRAMES_CLEAR;
@@ -115,9 +120,37 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
     }
   };
 
-  const handleEnviar = () => {
-    // TODO: conectar con backend / servicio de email
-    console.log({ nombre, mail, telefono, descripcion });
+  const handleEnviar = async () => {
+    if (enviando || enviado) return;
+    setEnviando(true);
+    setErrorEnvio(false);
+
+    const { serviceId, templateId, publicKey } = contactConfig.emailjs;
+
+    try {
+      await emailjs.send(
+        serviceId,
+        templateId,
+        {
+          to_email:   contactConfig.destinatario,
+          from_name:  nombre,
+          from_email: mail,
+          telefono,
+          descripcion,
+        },
+        publicKey
+      );
+      setEnviado(true);
+      setNombre('');
+      setMail('');
+      setTelefono('');
+      setDescripcion('');
+    } catch (err) {
+      console.error('Error al enviar:', err);
+      setErrorEnvio(true);
+    } finally {
+      setEnviando(false);
+    }
   };
 
   // Start open animation
@@ -352,10 +385,25 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
           </div>
 
           <div className="contacto-send-area">
-            <button className="contacto-send-btn" onClick={handleEnviar} title="Enviar">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-              </svg>
+            {enviado && <span className="contacto-status contacto-status--ok">¡Enviado!</span>}
+            {errorEnvio && <span className="contacto-status contacto-status--error">Error al enviar</span>}
+            <button
+              className="contacto-send-btn"
+              onClick={handleEnviar}
+              title="Enviar"
+              disabled={enviando || enviado}
+            >
+              {enviando ? (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" strokeDasharray="31.4" strokeLinecap="round">
+                    <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/>
+                  </circle>
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+              )}
             </button>
           </div>
         </>

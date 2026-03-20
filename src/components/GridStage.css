@@ -110,6 +110,55 @@
 .grid-stage:not(.dark) .card-label { color: #2c2c2c; }
 .grid-stage.dark .card-label       { color: #f0e6d3; }
 
+/* ── Height-based responsive: short screens
+   Grid natural height ≈ max-width × 4/3 (2 rows of 3:4 cards)
+   Formula: max-width ≤ (viewport_height - padding_top) × 3/4
+
+   1229×692 → max-width: 480px → grid height ≈ 640 + 40 = 680 < 692 ✓
+   1093×614 → max-width: 430px → grid height ≈ 573 + 28 = 601 < 614 ✓
+   ×× < 580  → max-width: 380px → grid height ≈ 507 + 22 = 529 < 580 ✓
+*/
+@media (max-height: 780px) and (min-width: 501px) {
+  .grid-stage {
+    padding: 8px;
+    padding-top: 40px;
+  }
+  .cards-grid {
+    max-width: 480px;
+  }
+}
+
+@media (max-height: 650px) and (min-width: 501px) {
+  .grid-stage {
+    padding: 4px;
+    padding-top: 28px;
+  }
+  .cards-grid {
+    max-width: 430px;
+  }
+}
+
+@media (max-height: 580px) and (min-width: 501px) {
+  .grid-stage {
+    padding: 2px;
+    padding-top: 22px;
+  }
+  .cards-grid {
+    max-width: 380px;
+  }
+  .card-text-overlay {
+    font-size: 17px;
+    -webkit-text-stroke: 4px;
+  }
+}
+
+/* ── Width-based responsive: tablet portrait (501–768px wide) */
+@media (max-width: 768px) and (min-width: 501px) {
+  .cards-grid {
+    max-width: 480px;
+  }
+}
+
 /* ── Mobile responsive ─────────────────────────────────────────── */
 @media (max-width: 500px) {
   .grid-stage {

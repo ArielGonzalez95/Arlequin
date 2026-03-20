@@ -116,6 +116,12 @@
   animation: fade-in 0.5s ease-out 0.3s both;
 }
 
+/* Short desktop/laptop screens — the card scales down, so the
+   absolute-positioned form must follow the same scale adjustments
+   defined in CardQueEsArlequin.css. No extra override needed here
+   because the form is a child of .card-contacto-outer which is
+   inside .card-que-es-arlequin; the parent scale handles it.      */
+
 @media (max-width: 430px) {
   .contacto-form {
     top: 47%;
@@ -133,7 +139,8 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #111;
+  color: #e7b81d;
+  border-color: red;
   padding: 0;
   display: flex;
   align-items: center;
@@ -142,5 +149,19 @@
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.contacto-send-btn:hover  { opacity: 0.75; transform: rotate(-34deg) translateX(3px) translateY(-3px); }
-.contacto-send-btn:active { opacity: 0.5;  transform: rotate(-34deg) translateX(6px) translateY(-6px); }
+.contacto-send-btn:hover:not(:disabled)  { opacity: 0.75; transform: rotate(-34deg) translateX(3px) translateY(-3px); }
+.contacto-send-btn:active:not(:disabled) { opacity: 0.5;  transform: rotate(-34deg) translateX(6px) translateY(-6px); }
+.contacto-send-btn:disabled { opacity: 0.4; cursor: default; }
+
+.contacto-status {
+  display: block;
+  font-family: 'Caveat', cursive;
+  font-size: 12px;
+  text-align: right;
+  margin-bottom: 2px;
+  transform: rotate(-34deg);
+  transform-origin: right center;
+}
+
+.contacto-status--ok    { color: #2a7a2a; }
+.contacto-status--error { color: #b42828; }
