@@ -313,6 +313,8 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
   // Preload button frames
   useEffect(() => {
     const theme = isDarkMode ? 'dark' : 'clear';
+    let cancelled = false;
+
     setIsBtnLoaded(false);
     setBtnPhaseDone(false);
     btnPhaseRef.current = 'loop';
@@ -322,7 +324,7 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
       btnLoopFramesRef.current = _btnCache[theme].loop;
       btnSendFramesRef.current = _btnCache[theme].send;
       setIsBtnLoaded(true);
-      return;
+      return () => { cancelled = true; };
     }
 
     const folder = `/NEW_animacion_boton_enviar_${theme}/NEW_animacion_boton_enviar_${theme}/`;
@@ -347,11 +349,14 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
     });
 
     Promise.all([Promise.all(loopPromises), Promise.all(sendPromises)]).then(([loop, send]) => {
+      if (cancelled) return; // tema cambió mientras cargaba — descartar
       _btnCache[theme] = { loop, send };
       btnLoopFramesRef.current = loop;
       btnSendFramesRef.current = send;
       setIsBtnLoaded(true);
     });
+
+    return () => { cancelled = true; };
   }, [isDarkMode]);
 
   // Draw first card frame when loaded
@@ -556,20 +561,26 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
                 disabled={enviado}
               />
             </div>
-            <div className="contacto-field-group">
+            <div
+              className="contacto-field-group"
+              data-error={mail.trim() && !mailValido ? 'Mail inválido' : undefined}
+            >
               <input
                 type="email"
-                className="contacto-field"
+                className={`contacto-field${mail.trim() && !mailValido ? ' contacto-field--invalid' : ''}`}
                 placeholder="Mail"
                 value={mail}
                 onChange={e => setMail(e.target.value)}
                 disabled={enviado}
               />
             </div>
-            <div className="contacto-field-group">
+            <div
+              className="contacto-field-group"
+              data-error={telefono.trim() && !telValido ? 'Teléfono inválido' : undefined}
+            >
               <input
                 type="tel"
-                className="contacto-field"
+                className={`contacto-field${telefono.trim() && !telValido ? ' contacto-field--invalid' : ''}`}
                 placeholder="Teléfono"
                 value={telefono}
                 onChange={e => setTelefono(e.target.value)}
