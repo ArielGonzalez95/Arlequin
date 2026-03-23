@@ -176,6 +176,7 @@
   .grid-stage {
     padding: 8px;
     padding-top: 40px;
+    padding-bottom: 70px;
   }
   .cards-grid {
     max-width: 470px;
@@ -191,6 +192,7 @@
   .grid-stage {
     padding: 6px;
     padding-top: 36px;
+    padding-bottom: 65px;
   }
   .cards-grid {
     max-width: 420px;
@@ -206,6 +208,7 @@
   .grid-stage {
     padding: 6px;
     padding-top: 32px;
+    padding-bottom: 60px;
   }
   .cards-grid {
     max-width: 385px;
@@ -221,6 +224,7 @@
   .grid-stage {
     padding: 4px;
     padding-top: 28px;
+    padding-bottom: 55px;
   }
   .cards-grid {
     max-width: 355px;

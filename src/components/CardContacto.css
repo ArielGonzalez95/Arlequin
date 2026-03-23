@@ -94,17 +94,6 @@
   position: relative;
 }
 
-.contacto-field-group[data-error]:hover::after {
-  content: attr(data-error);
-  position: absolute;
-  top: -18px;
-  left: 0;
-  font-family: 'Caveat', cursive;
-  font-size: 11px;
-  color: rgba(180, 40, 40, 0.85);
-  white-space: nowrap;
-  pointer-events: none;
-}
 
 .contacto-word-count {
   font-family: 'Caveat', cursive;

@@ -64,3 +64,22 @@
   to   { opacity: 0; transform: translate(-50%, -50%) scale(0); }
 }
 
+/* ── Mobile: subir contenido para no chocar con el footer ───────── */
+@media (max-width: 500px) {
+  .mask-content {
+    padding-bottom: 60px;
+  }
+}
+
+@media (max-width: 390px) {
+  .mask-content {
+    padding-bottom: 55px;
+  }
+}
+
+@media (max-width: 360px) {
+  .mask-content {
+    padding-bottom: 50px;
+  }
+}
+
