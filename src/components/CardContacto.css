@@ -116,7 +116,6 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  left: 3%;
   z-index: 50;
   animation: contacto-form-fadein 0.5s ease-out 0.3s both;
   pointer-events: none;
@@ -138,7 +137,6 @@
   .contacto-send-area {
     bottom: 0;
     right: 0;
-    left: 3%;
   }
 }
 
