@@ -180,9 +180,11 @@ function LogoAnimation({
   const hoveredRef        = useRef(false);
   const currentThemePrefix = isDarkMode ? 'dark' : 'clear';
 
-  // Detect touch-only devices (no hover support) once on mount
+  // Detect touch-only devices once on mount.
+  // navigator.maxTouchPoints > 0 is the most reliable check on iOS Safari;
+  // matchMedia('hover: none') can fail on some iOS versions.
   useEffect(() => {
-    isMobileRef.current = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    isMobileRef.current = navigator.maxTouchPoints > 0 && !window.matchMedia('(hover: hover)').matches;
   }, []);
 
   // ── Image preloading ──────────────────────────────────────────────────────
