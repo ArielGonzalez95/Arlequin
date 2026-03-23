@@ -470,6 +470,8 @@ function LogoAnimation({
   }, [handleClick]);
 
   const handleMouseMove = useCallback((event) => {
+    // On mobile, auto-loop controls the animation — ignore synthetic mouse events from iOS
+    if (isMobileRef.current) return;
     const container = event.currentTarget;
     const rect = container.getBoundingClientRect();
     const dx = event.clientX - rect.left - rect.width  / 2;
@@ -490,6 +492,7 @@ function LogoAnimation({
   }, []);
 
   const handleMouseEnter = useCallback(() => {
+    if (isMobileRef.current) return;
     // Mouse entered the container — mark as potentially hovered
     // (actual OPENING is triggered by handleMouseMove once inside the circle)
     // If re-entering during CLOSING, restart immediately
@@ -501,6 +504,7 @@ function LogoAnimation({
   }, []);
 
   const handleMouseLeave = useCallback(() => {
+    if (isMobileRef.current) return;
     // Mouse left the container entirely — close
     hoveredRef.current = false;
     const cur = animationStateRef.current;
