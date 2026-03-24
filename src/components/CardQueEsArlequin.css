@@ -277,7 +277,7 @@
   }
   .card-que-es-arlequin {
     transform: scale(0.78);
-    transform-origin: center top;
+    transform-origin: center center;
   }
 }
 
@@ -285,7 +285,7 @@
 @media (max-width: 430px) {
   .card-que-es-arlequin {
     transform: scale(0.73);
-    transform-origin: center top;
+    transform-origin: center center;
   }
 }
 
@@ -293,7 +293,7 @@
 @media (max-width: 390px) {
   .card-que-es-arlequin {
     transform: scale(0.68);
-    transform-origin: center top;
+    transform-origin: center center;
   }
 }
 
@@ -301,6 +301,6 @@
 @media (max-width: 360px) {
   .card-que-es-arlequin {
     transform: scale(0.62);
-    transform-origin: center top;
+    transform-origin: center center;
   }
 }
