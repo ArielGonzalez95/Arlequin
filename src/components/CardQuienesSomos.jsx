@@ -130,8 +130,8 @@ function CardQuienesSomos({ isDarkMode, onClose, fromGrid = false }) {
   const [isClosing, setIsClosing] = useState(false);
   const [isScalingDown, setIsScalingDown] = useState(false);
 
-  // CardQuienesSomos always uses dark cards regardless of site theme
-  const cardFrames     = CARD_FRAMES_DARK;
+  // Animation frames follow the theme; fixed final frame is always dark
+  const cardFrames     = isDarkMode ? CARD_FRAMES_DARK : CARD_FRAMES_CLEAR;
   const cardFinalFrame = CARD_FINAL_FRAME_DARK;
   const totalFrames    = cardFrames.length;
   const currentPage = PAGES[currentPageIndex];
@@ -167,10 +167,10 @@ function CardQuienesSomos({ isDarkMode, onClose, fromGrid = false }) {
   // On theme change: silently swaps image buffers without resetting animation state
   useEffect(() => {
     const wasLoaded = isLoadedRef.current;
-    const themeCloseFrames = CLOSE_FRAMES_DARK;
+    const themeCloseFrames = isDarkMode ? CLOSE_FRAMES_DARK : CLOSE_FRAMES_CLEAR;
 
     const loadImages = async () => {
-      const themeKey = 'dark';
+      const themeKey = isDarkMode ? 'dark' : 'clear';
 
       if (_openCache[themeKey]) {
         imagesRef.current = _openCache[themeKey];
@@ -233,7 +233,7 @@ function CardQuienesSomos({ isDarkMode, onClose, fromGrid = false }) {
     };
 
     loadImages();
-  }, []);
+  }, [isDarkMode]);
 
   // Draw first frame
   useEffect(() => {
