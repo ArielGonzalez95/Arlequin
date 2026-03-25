@@ -39,6 +39,7 @@ function ArlequinMaskSystem({
   const [selectedCard, setSelectedCard] = useState(null);
   const [cardFromGrid, setCardFromGrid] = useState(false);
   const [isShrinkingOut, setIsShrinkingOut] = useState(false);
+  const [preloadCard, setPreloadCard] = useState(null);
   // Use ref for tracking "NO" flow - more reliable than state
   const pendingCardStageRef = useRef(false);
 
@@ -114,8 +115,14 @@ function ArlequinMaskSystem({
     }, 380);
   }, [onReset]);
 
+  // Handle grid card pre-click - preload images in background
+  const handleGridCardPreClick = useCallback((cardIndex) => {
+    setPreloadCard(cardIndex);
+  }, []);
+
   // Handle grid card click - show individual card
   const handleGridCardClick = useCallback((cardIndex) => {
+    setPreloadCard(null);
     setSelectedCard(cardIndex);
     setCardFromGrid(true);
     setStage(STAGES.CARD_DETAIL);
@@ -148,8 +155,9 @@ function ArlequinMaskSystem({
         );
       case STAGES.GRID:
         return (
-          <GridStage 
+          <GridStage
             onCardClick={handleGridCardClick}
+            onCardPreClick={handleGridCardPreClick}
             isDarkMode={isDarkMode}
           />
         );
@@ -172,9 +180,14 @@ function ArlequinMaskSystem({
   };
 
   const showEscudo = phase === 'contentVisible';
+  const PreloadComponent = preloadCard ? CARD_COMPONENTS[preloadCard] : null;
 
   return (
     <div className="arlequin-mask-system ready">
+      {/* Pre-mount next card invisibly so images are cached before grid animates away */}
+      {PreloadComponent && (
+        <PreloadComponent preload={true} isDarkMode={isDarkMode} />
+      )}
       {showEscudo && (
         <ArlequinEscudo
           onClick={handleEscudoClick}

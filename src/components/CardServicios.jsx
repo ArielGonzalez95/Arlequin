@@ -152,7 +152,7 @@ const page7Lines = [
 const cardTexts = [page1Lines, page2Lines, page3Lines, page4Lines, page5Lines, page6Lines, page7Lines];
 
 // ─────────────────────────────────────────────────────────────────
-function CardServicios({ isDarkMode, onClose, fromGrid = false }) {
+function CardServicios({ isDarkMode, onClose, fromGrid = false, preload = false }) {
   const canvasRef          = useRef(null);
   const imagesRef          = useRef([]);
   const closeImagesRef     = useRef([]);
@@ -213,10 +213,10 @@ function CardServicios({ isDarkMode, onClose, fromGrid = false }) {
       if (_openCache[themeKey]) {
         imagesRef.current = _openCache[themeKey];
         closeImagesRef.current = _closeCache[themeKey];
-        if (!wasLoaded) {
+        if (!wasLoaded && !preload) {
           isLoadedRef.current = true;
           setIsLoaded(true);
-        } else if (isCompleteRef.current) {
+        } else if (isCompleteRef.current && !preload) {
           const canvas = canvasRef.current;
           const ctx = canvas.getContext('2d');
           const finalFrame = _openCache[themeKey][_openCache[themeKey].length - 1];
@@ -254,10 +254,10 @@ function CardServicios({ isDarkMode, onClose, fromGrid = false }) {
       imagesRef.current      = openResults;
       closeImagesRef.current = closeResults;
 
-      if (!wasLoaded) {
+      if (!wasLoaded && !preload) {
         isLoadedRef.current = true;
         setIsLoaded(true);
-      } else if (isCompleteRef.current) {
+      } else if (isCompleteRef.current && !preload) {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const finalFrame = openResults[openResults.length - 1];
@@ -268,7 +268,7 @@ function CardServicios({ isDarkMode, onClose, fromGrid = false }) {
       }
     };
     loadImages();
-  }, [isDarkMode]);
+  }, [isDarkMode, preload]);
 
   // Draw first frame when loaded
   useEffect(() => {
@@ -362,6 +362,7 @@ function CardServicios({ isDarkMode, onClose, fromGrid = false }) {
     return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
   }, [isClosing, isLoaded]);
 
+  if (preload) return null;
   if (!isLoaded) return <div className="card-que-es-arlequin loading" />;
 
   return (

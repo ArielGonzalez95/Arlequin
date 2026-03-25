@@ -82,7 +82,7 @@ const _openCache  = {};
 const _closeCache = {};
 const _btnCache   = {};
 
-function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
+function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }) {
   const canvasRef             = useRef(null);
   const imagesRef             = useRef([]);
   const closeImagesRef        = useRef([]);
@@ -253,10 +253,10 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
       if (_openCache[themeKey]) {
         imagesRef.current = _openCache[themeKey];
         closeImagesRef.current = _closeCache[themeKey];
-        if (!wasLoaded) {
+        if (!wasLoaded && !preload) {
           isLoadedRef.current = true;
           setIsLoaded(true);
-        } else if (isCompleteRef.current) {
+        } else if (isCompleteRef.current && !preload) {
           const canvas = canvasRef.current;
           const ctx    = canvas.getContext('2d');
           const finalFrame = _openCache[themeKey][_openCache[themeKey].length - 1];
@@ -294,10 +294,10 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
       imagesRef.current      = openResults;
       closeImagesRef.current = closeResults;
 
-      if (!wasLoaded) {
+      if (!wasLoaded && !preload) {
         isLoadedRef.current = true;
         setIsLoaded(true);
-      } else if (isCompleteRef.current) {
+      } else if (isCompleteRef.current && !preload) {
         const canvas = canvasRef.current;
         const ctx    = canvas.getContext('2d');
         const finalFrame = openResults[openResults.length - 1];
@@ -308,7 +308,7 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
       }
     };
     loadImages();
-  }, [isDarkMode]);
+  }, [isDarkMode, preload]);
 
   // Preload button frames
   useEffect(() => {
@@ -530,6 +530,7 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false }) {
     };
   }, [showContent, isBtnLoaded]);
 
+  if (preload) return null;
   if (!isLoaded) return <div className="card-que-es-arlequin loading" />;
 
   return (
