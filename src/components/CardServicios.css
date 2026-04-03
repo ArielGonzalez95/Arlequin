@@ -52,14 +52,14 @@
 }
 
 .card-servicios .card-text h2 {
-  font-family: 'Cinzel Black', serif;
+  font-family: 'CinzelDecorative-Bold', serif;
   font-size: 24px;
   margin-bottom: 10px;
 }
 
 .card-servicios .card-text p {
-  font-family: 'Cinzel', serif;
-  font-size: 16px;
+  font-family: 'NewRocker-Regular', serif;
+  font-size: 18px;
   line-height: 1.6;
   max-width: 300px;
 }

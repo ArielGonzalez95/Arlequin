@@ -1,3 +1,17 @@
+@font-face {
+  font-family: 'NewRocker-Regular';
+  src: url('/fonts/NewRocker-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'CinzelDecorative-Bold';
+  src: url('/fonts/CinzelDecorative-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
 * {
   margin: 0;
   padding: 0;

@@ -14,13 +14,13 @@ function useMaskPositions() {
         setPositions({
           OFFSCREEN: { left: 'translateX(-300px)', right: 'translateX(300px)' },
           CLOSED:    { left: 'translateX(17px)',    right: 'translateX(-20px)' },
-          OPEN:      { left: 'translateX(-85px)',  right: 'translateX(85px)' }
+          OPEN:      { left: 'translateX(-100px)',  right: 'translateX(100px)' }
         });
       } else {
         setPositions({
           OFFSCREEN: { left: 'translateX(-1000px)', right: 'translateX(1000px)' },
           CLOSED:    { left: 'translateX(-9px)',     right: 'translateX(5px)' },
-          OPEN:      { left: 'translateX(-200px)',  right: 'translateX(200px)' }
+          OPEN:      { left: 'translateX(-230px)',  right: 'translateX(230px)' }
         });
       }
     };
@@ -45,7 +45,7 @@ function ArlequinMask({ isDarkMode, phase, onTransitionEnd }) {
     // Fase logoShrinking/maskClosing/reverseClosing - máscara cerrada
     CLOSED:    { left: 'translateX(-9px)',    right: 'translateX(5px)' },
     // Fase maskOpening/contentVisible - máscara abierta
-    OPEN:     { left: 'translateX(-200px)', right: 'translateX(200px)' }
+    OPEN:     { left: 'translateX(-230px)', right: 'translateX(230px)' }
   };
   
   const positions = maskPositions || defaultTransforms;

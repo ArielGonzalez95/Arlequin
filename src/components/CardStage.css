@@ -232,9 +232,9 @@
 }
 
 .card-title {
-  font-family: 'Cinzel-Medium', serif;
+  font-family: 'CinzelDecorative-Bold', serif;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
   margin: 0;
@@ -266,8 +266,8 @@
 }
 
 .card-text {
-  font-family: 'Cinzel-Medium', serif;
-  font-size: 30px;
+  font-family: 'NewRocker-Regular', serif;
+  font-size: 18px;
   line-height: 1.8;
   color: #ffffff;
   text-align: left;
@@ -281,7 +281,7 @@
   display: block;
   white-space: nowrap;
   text-align: left;
-  font-size: 17px;
+  font-size: 18px;
 }
 
 .card-text.card-text--clear {

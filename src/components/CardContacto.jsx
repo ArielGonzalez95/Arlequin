@@ -39,6 +39,27 @@ const CARD_FRAMES_BLACK = [
 const CARD_FINAL_FRAME_CLEAR = 'arlequin_contacto_clear_boton.avif';
 const CARD_FINAL_FRAME_BLACK  = 'arlequin_contacto_dark_boton.avif';
 
+
+const FRENTE_FRAMES_CLEAR = [
+  '00007_arlequin_frente_clear.avif',
+  '00008_arlequin_frente_clear.avif',
+  '00009_arlequin_frente_clear.avif',
+  '00010_arlequin_frente_clear.avif',
+  '00011_arlequin_frente_clear.avif',
+  '00012_arlequin_frente_clear.avif',
+];
+
+const FRENTE_FRAMES_BLACK = [
+  '00007_arlequin_frente_dark.avif',
+  '00008_arlequin_frente_dark.avif',
+  '00009_arlequin_frente_dark.avif',
+  '00010_arlequin_frente_dark.avif',
+  '00011_arlequin_frente_dark.avif',
+  '00012_arlequin_frente_dark.avif',
+];
+
+const _frenteCache = {};
+
 const CLOSE_FRAMES_CLEAR = [
   '00013_arlequin_contacto_clear.avif',
   '00014_arlequin_contacto_clear.avif',
@@ -103,6 +124,12 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }
   const btnPhaseRef      = useRef('loop'); // 'loop' | 'send' | 'done'
   const btnLastTimeRef   = useRef(0);
 
+  // Post-send reverse animation refs
+  const postSendAnimRef  = useRef(null);
+  const postSendFrameRef = useRef(12);
+  const postSendLastRef  = useRef(0);
+  const frenteFramesRef  = useRef([]);
+
   const [isLoaded,          setIsLoaded]          = useState(false);
   const [canStartAnimation, setCanStartAnimation] = useState(false);
   const [showContent,       setShowContent]       = useState(false);
@@ -117,10 +144,12 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }
   const [errorEnvio,        setErrorEnvio]        = useState(false);
   const [isBtnLoaded,       setIsBtnLoaded]       = useState(false);
   const [btnPhaseDone,      setBtnPhaseDone]      = useState(false);
+  const [showFijaText,      setShowFijaText]      = useState(false);
 
   const cardFrames     = isDarkMode ? CARD_FRAMES_BLACK    : CARD_FRAMES_CLEAR;
   const closeFrames    = isDarkMode ? CLOSE_FRAMES_BLACK   : CLOSE_FRAMES_CLEAR;
   const cardFinalFrame = isDarkMode ? CARD_FINAL_FRAME_BLACK : CARD_FINAL_FRAME_CLEAR;
+  const frenteFrames   = isDarkMode ? FRENTE_FRAMES_BLACK    : FRENTE_FRAMES_CLEAR;
   const totalFrames    = cardFrames.length;
 
   const handleClose = () => {
@@ -129,15 +158,6 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }
     setIsClosing(true);
   };
 
-  const countWords = (text) =>
-    text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-
-  const handleDescripcion = (e) => {
-    const val = e.target.value;
-    if (countWords(val) <= 30 || val.length < descripcion.length) {
-      setDescripcion(val);
-    }
-  };
 
   const handleEnviar = async () => {
     if (enviando || enviado) return;
@@ -253,6 +273,9 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }
       if (_openCache[themeKey]) {
         imagesRef.current = _openCache[themeKey];
         closeImagesRef.current = _closeCache[themeKey];
+        if (_frenteCache[themeKey]) {
+          frenteFramesRef.current = _frenteCache[themeKey];
+        }
         if (!wasLoaded && !preload) {
           isLoadedRef.current = true;
           setIsLoaded(true);
@@ -293,6 +316,21 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }
       _closeCache[themeKey]  = closeResults;
       imagesRef.current      = openResults;
       closeImagesRef.current = closeResults;
+
+      // Precarga frames de frente (animación post-envío)
+      if (_frenteCache[themeKey]) {
+        frenteFramesRef.current = _frenteCache[themeKey];
+      } else {
+        Promise.all(frenteFrames.map(file => new Promise(resolve => {
+          const img = new Image();
+          img.onload  = () => img.decode().then(() => resolve(img)).catch(() => resolve(img));
+          img.onerror = () => resolve(null);
+          img.src = `/Cartas/${file}`;
+        }))).then(results => {
+          _frenteCache[themeKey] = results;
+          frenteFramesRef.current = results;
+        });
+      }
 
       if (!wasLoaded && !preload) {
         isLoadedRef.current = true;
@@ -422,6 +460,7 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }
     if (!isClosing || !isLoaded) return;
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
     if (btnAnimRef.current) cancelAnimationFrame(btnAnimRef.current);
+    if (postSendAnimRef.current) cancelAnimationFrame(postSendAnimRef.current);
 
     const canvas = canvasRef.current;
     const ctx    = canvas.getContext('2d');
@@ -451,6 +490,79 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }
     animationRef.current = requestAnimationFrame(animate);
     return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
   }, [isClosing, isLoaded]);
+
+  // Post-send animation: reversa 12→6, luego frente 0→5, luego carta fija
+  useEffect(() => {
+    if (!btnPhaseDone) return;
+    setShowContent(false);
+
+    // Detener el loop de apertura que sigue corriendo en background
+    if (animationRef.current) { cancelAnimationFrame(animationRef.current); animationRef.current = null; }
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const drawFija = () => {
+      const frames = frenteFramesRef.current;
+      const fija = frames[frames.length - 1];
+      if (fija) {
+        ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+        ctx.drawImage(fija, 0, 0, CARD_WIDTH, CARD_HEIGHT);
+        setShowFijaText(true);
+      } else {
+        postSendAnimRef.current = requestAnimationFrame(drawFija);
+      }
+    };
+
+    // Fase 2: frente abre desde el fold point (0→5)
+    const animateFrente = (timestamp) => {
+      if (!frenteFramesRef.current.length) {
+        postSendAnimRef.current = requestAnimationFrame(animateFrente);
+        return;
+      }
+      if (postSendLastRef.current === 0) postSendLastRef.current = timestamp;
+      if (timestamp - postSendLastRef.current >= CARD_FRAME_DURATION) {
+        postSendLastRef.current += CARD_FRAME_DURATION;
+        const img = frenteFramesRef.current[postSendFrameRef.current];
+        if (img) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(img, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+        if (postSendFrameRef.current < frenteFramesRef.current.length - 1) {
+          postSendFrameRef.current++;
+          postSendAnimRef.current = requestAnimationFrame(animateFrente);
+        } else {
+          drawFija();
+        }
+      } else {
+        postSendAnimRef.current = requestAnimationFrame(animateFrente);
+      }
+    };
+
+    // Fase 1: contacto cierra hasta fold point (12→6), sin tocar los dorso
+    postSendFrameRef.current = 12;
+    postSendLastRef.current  = 0;
+
+    const animateReversa = (timestamp) => {
+      if (postSendLastRef.current === 0) postSendLastRef.current = timestamp;
+      if (timestamp - postSendLastRef.current >= CARD_FRAME_DURATION) {
+        postSendLastRef.current += CARD_FRAME_DURATION;
+        const img = imagesRef.current[postSendFrameRef.current];
+        if (img) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(img, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+        if (postSendFrameRef.current > 6) {
+          postSendFrameRef.current--;
+          postSendAnimRef.current = requestAnimationFrame(animateReversa);
+        } else {
+          postSendFrameRef.current = 0;
+          postSendLastRef.current  = 0;
+          postSendAnimRef.current  = requestAnimationFrame(animateFrente);
+        }
+      } else {
+        postSendAnimRef.current = requestAnimationFrame(animateReversa);
+      }
+    };
+
+    postSendAnimRef.current = requestAnimationFrame(animateReversa);
+    return () => { if (postSendAnimRef.current) cancelAnimationFrame(postSendAnimRef.current); };
+  }, [btnPhaseDone]);
 
   // Button animation RAF loop
   useEffect(() => {
@@ -549,6 +661,14 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }
         style={!isScalingDown && fromGrid ? { animation: 'none' } : undefined}
       />
 
+      {showFijaText && (
+        <div className="contacto-fija-text">
+          <span>Gracias por tu Msj ⭐</span>
+          <span>Nos comunicaremos</span>
+          <span>a la Brevedad 🎭</span>
+        </div>
+      )}
+
       {showContent && (
         <>
           <div className="contacto-form">
@@ -569,7 +689,7 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }
               <input
                 type="email"
                 className={`contacto-field${mail.trim() && !mailValido ? ' contacto-field--invalid' : ''}`}
-                placeholder="Mail"
+                placeholder="@"
                 value={mail}
                 onChange={e => setMail(e.target.value)}
                 disabled={enviado}
@@ -582,35 +702,37 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }
               <input
                 type="tel"
                 className={`contacto-field${telefono.trim() && !telValido ? ' contacto-field--invalid' : ''}`}
-                placeholder="Teléfono"
+                placeholder="Tel"
                 value={telefono}
                 onChange={e => setTelefono(e.target.value)}
                 disabled={enviado}
               />
             </div>
             <div className="contacto-field-group">
-              <input
-                type="text"
+              <textarea
                 className="contacto-field"
-                placeholder="Descripción"
+                placeholder="Servicio de interés"
                 value={descripcion}
-                onChange={handleDescripcion}
+                onChange={e => setDescripcion(e.target.value)}
+                maxLength={500}
+                rows={2}
                 disabled={enviado}
               />
-              <div className={`contacto-word-count${countWords(descripcion) >= 30 ? ' over' : ''}`}>
-                {countWords(descripcion)}/30
-              </div>
             </div>
           </div>
 
-          {/* Canvas visual — siempre pointer-events:none, no bloquea el form */}
+          {/* Canvas visual del botón */}
           <div className="contacto-send-area">
             {errorEnvio && <span className="contacto-status contacto-status--error">Error al enviar</span>}
             {!btnPhaseDone && isBtnLoaded && (
               <canvas
                 ref={btnCanvasRef}
                 className="contacto-send-canvas"
-                style={{ opacity: formValido ? 1 : 0.4 }}
+                style={{
+                  opacity: formValido || enviado ? 1 : 0.4,
+                  pointerEvents: formValido && !enviando && !enviado ? 'auto' : 'none',
+                  cursor: formValido && !enviando && !enviado ? 'pointer' : 'default',
+                }}
               />
             )}
           </div>

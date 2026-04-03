@@ -32,12 +32,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease;
   z-index: 100;
+  animation: pulse-close 3s ease-in-out infinite;
 }
 
 .card-close-btn:hover {
   transform: scale(1.2);
+  animation: none;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8))
+           drop-shadow(0 0 8px rgba(0, 0, 0, 0.6));
+}
+
+@keyframes pulse-close {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3))
+            drop-shadow(0 0 4px rgba(0, 0, 0, 0.35));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.65))
+            drop-shadow(0 0 8px rgba(0, 0, 0, 0.55));
+  }
 }
 
 .card-close-btn-img {
@@ -163,9 +179,9 @@
 }
 
 .card-title {
-  font-family: 'Cinzel-Medium', serif;
+  font-family: 'CinzelDecorative-Bold', serif;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
   margin: 0;
@@ -193,8 +209,8 @@
 }
 
 .card-text {
-  font-family: 'Cinzel-Medium', serif;
-  font-size: 30px;
+  font-family: 'NewRocker-Regular', serif;
+  font-size: 18px;
   line-height: 1.8;
   color: #ffffff;
   text-align: left;
@@ -208,7 +224,7 @@
   display: block;
   white-space: nowrap;
   text-align: left;
-  font-size: 17px;
+  font-size: 18px;
 }
 
 .card-text.card-text--clear {
@@ -221,6 +237,14 @@
    (canvas, title, text, nav buttons) shrinks proportionally.
    transform-origin: center so it stays centered inside mask-content.
    ──────────────────────────────────────────────────────────────── */
+
+/* Full desktop: tall screens ≥769px wide */
+@media (min-width: 769px) and (min-height: 781px) {
+  .card-que-es-arlequin {
+    transform: scale(1.12);
+    transform-origin: center center;
+  }
+}
 
 /* Short desktop/laptop screens
    Calibrated against common viewport heights after Windows DPI scaling:

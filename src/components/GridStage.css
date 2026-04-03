@@ -13,18 +13,23 @@
   width: 100%;
   height: 100%;
   padding: 20px;
-  padding-top: 60px;
+  padding-top: 100px;
 }
 
 .grid-stage.loading {
   display: none;
 }
 
+:root {
+  --grid-overlap-v: 52px;   /* solape vertical entre filas        */
+  --grid-overlap-h: 31px;   /* solape horizontal entre columnas   */
+}
+
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0px;
-  max-width: 540px;
+  max-width: 578px;
   width: 100%;
   position: relative;
   min-height: 300px;
@@ -40,8 +45,31 @@
   transition: transform 0.5s ease-out, opacity 0.5s ease-out;
 }
 
+/* Fila superior: baja hacia la fila inferior */
+.grid-card:nth-child(-n+2) {
+  margin-bottom: calc(-1 * var(--grid-overlap-v));
+  z-index: 1;
+}
+
+/* Fila inferior: sube para solapar sobre las de arriba */
+.grid-card:nth-child(n+3) {
+  margin-top: calc(-1 * var(--grid-overlap-v));
+  z-index: 2;
+}
+
+/* Columna izquierda: acerca la columna derecha */
+.grid-card:nth-child(odd) {
+  margin-right: calc(-1 * var(--grid-overlap-h));
+}
+
+/* Columna derecha: acerca la columna izquierda */
+.grid-card:nth-child(even) {
+  margin-left: calc(-1 * var(--grid-overlap-h));
+}
+
 .grid-card:hover {
   transform: scale(1.05);
+  z-index: 2;
 }
 
 .grid-card .card-back {
@@ -78,24 +106,27 @@
   pointer-events: none;
   z-index: 3;
   paint-order: stroke fill;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .card-text-overlay div {
-  line-height: 1.1;
+  line-height: calc(1.1em + 1px);
 }
 
 /* Modo dark: texto negro, borde blanco — más grueso abajo e izquierda */
 .grid-stage.dark .card-text-overlay {
   color: #000000;
   -webkit-text-stroke: 5px #ffffff;
-  filter: drop-shadow(-2px 3px 0 #ffffff);
+  filter: drop-shadow(-2px 2.5px 0 #ffffff) drop-shadow(0 10px 8px rgba(255, 255, 255, 0.45));
 }
 
 /* Modo clear: texto blanco, borde negro — más grueso abajo e izquierda */
 .grid-stage:not(.dark) .card-text-overlay {
   color: #ffffff;
   -webkit-text-stroke: 5px #000000;
-  filter: drop-shadow(-2px 3px 0 #000000);
+  filter: drop-shadow(-2px 2.5px 0 #000000) drop-shadow(0 10px 8px rgba(0, 0, 0, 0.45));
 }
 
 .grid-card .card-label {
@@ -122,11 +153,11 @@
 @media (max-height: 780px) and (min-width: 501px) {
   .grid-stage {
     padding: 8px;
-    padding-top: 112px;
+    padding-top: 130px;
     padding-bottom: 68px;
   }
   .cards-grid {
-    max-width: 370px;
+    max-width: 396px;
   }
   .card-text-overlay {
     font-size: 17px;
@@ -137,11 +168,11 @@
 @media (max-height: 650px) and (min-width: 501px) {
   .grid-stage {
     padding: 6px;
-    padding-top: 94px;
+    padding-top: 108px;
     padding-bottom: 64px;
   }
   .cards-grid {
-    max-width: 330px;
+    max-width: 353px;
   }
   .card-text-overlay {
     font-size: 15px;
@@ -152,11 +183,11 @@
 @media (max-height: 580px) and (min-width: 501px) {
   .grid-stage {
     padding: 4px;
-    padding-top: 80px;
+    padding-top: 92px;
     padding-bottom: 58px;
   }
   .cards-grid {
-    max-width: 310px;
+    max-width: 332px;
   }
   .card-text-overlay {
     font-size: 14px;
@@ -167,7 +198,7 @@
 /* ── Width-based responsive: tablet portrait (501–768px wide) */
 @media (max-width: 768px) and (min-width: 501px) {
   .cards-grid {
-    max-width: 480px;
+    max-width: 514px;
   }
 }
 
@@ -175,16 +206,21 @@
 @media (max-width: 500px) {
   .grid-stage {
     padding: 8px;
-    padding-top: 40px;
+    padding-top: 80px;
     padding-bottom: 70px;
   }
   .cards-grid {
-    max-width: 370px;
+    --grid-overlap-v: 60px;
+    --grid-overlap-h: 36px;
+    max-width: 456px;
     gap: 0px;
   }
   .card-text-overlay {
     font-size: 16px;
     -webkit-text-stroke: 4px;
+  }
+  .grid-card:nth-child(n+3) {
+    margin-top: -21px;
   }
 }
 
@@ -195,12 +231,17 @@
     padding-bottom: 65px;
   }
   .cards-grid {
-    max-width: 330px;
+    --grid-overlap-v: 53px;
+    --grid-overlap-h: 32px;
+    max-width: 406px;
     gap: 0px;
   }
   .card-text-overlay {
     font-size: 15px;
     -webkit-text-stroke: 3px;
+  }
+  .grid-card:nth-child(n+3) {
+    margin-top: -17px;
   }
 }
 
@@ -211,12 +252,17 @@
     padding-bottom: 60px;
   }
   .cards-grid {
-    max-width: 300px;
+    --grid-overlap-v: 48px;
+    --grid-overlap-h: 29px;
+    max-width: 369px;
     gap: 0px;
   }
   .card-text-overlay {
     font-size: 14px;
     -webkit-text-stroke: 3px;
+  }
+  .grid-card:nth-child(n+3) {
+    margin-top: -14px;
   }
 }
 
@@ -227,11 +273,16 @@
     padding-bottom: 55px;
   }
   .cards-grid {
-    max-width: 275px;
+    --grid-overlap-v: 44px;
+    --grid-overlap-h: 27px;
+    max-width: 338px;
     gap: 0px;
   }
   .card-text-overlay {
     font-size: 13px;
     -webkit-text-stroke: 3px;
+  }
+  .grid-card:nth-child(n+3) {
+    margin-top: -12px;
   }
 }
