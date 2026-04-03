@@ -83,3 +83,16 @@
   }
 }
 
+/* ── Mobile tall (iPhone 13/14/15): bajar animación para clearar el escudo */
+@media (max-width: 430px) and (min-height: 700px) {
+  .mask-content {
+    padding-top: 120px;
+  }
+}
+
+@media (max-width: 390px) and (min-height: 700px) {
+  .mask-content {
+    padding-top: 110px;
+  }
+}
+

@@ -180,14 +180,13 @@ function ArlequinMaskSystem({
   };
 
   const showEscudo = phase === 'contentVisible';
-  const PreloadComponent = preloadCard ? CARD_COMPONENTS[preloadCard] : null;
 
   return (
     <div className="arlequin-mask-system ready">
-      {/* Pre-mount next card invisibly so images are cached before grid animates away */}
-      {PreloadComponent && (
-        <PreloadComponent preload={true} isDarkMode={isDarkMode} />
-      )}
+      {/* Preload ALL card images as soon as content becomes visible */}
+      {stage !== STAGES.NONE && Object.entries(CARD_COMPONENTS).map(([key, Component]) => (
+        <Component key={`preload-${key}`} preload={true} isDarkMode={isDarkMode} />
+      ))}
       {showEscudo && (
         <ArlequinEscudo
           onClick={handleEscudoClick}

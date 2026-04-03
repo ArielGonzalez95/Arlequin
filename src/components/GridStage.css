@@ -227,13 +227,13 @@
 @media (max-width: 430px) {
   .grid-stage {
     padding: 6px;
-    padding-top: 36px;
+    padding-top: 100px;
     padding-bottom: 65px;
   }
   .cards-grid {
-    --grid-overlap-v: 53px;
-    --grid-overlap-h: 32px;
-    max-width: 406px;
+    --grid-overlap-v: 48px;
+    --grid-overlap-h: 28px;
+    max-width: 370px;
     gap: 0px;
   }
   .card-text-overlay {
@@ -241,20 +241,20 @@
     -webkit-text-stroke: 3px;
   }
   .grid-card:nth-child(n+3) {
-    margin-top: -17px;
+    margin-top: -15px;
   }
 }
 
 @media (max-width: 390px) {
   .grid-stage {
     padding: 6px;
-    padding-top: 32px;
+    padding-top: 95px;
     padding-bottom: 60px;
   }
   .cards-grid {
-    --grid-overlap-v: 48px;
-    --grid-overlap-h: 29px;
-    max-width: 369px;
+    --grid-overlap-v: 44px;
+    --grid-overlap-h: 26px;
+    max-width: 340px;
     gap: 0px;
   }
   .card-text-overlay {
@@ -262,20 +262,20 @@
     -webkit-text-stroke: 3px;
   }
   .grid-card:nth-child(n+3) {
-    margin-top: -14px;
+    margin-top: -13px;
   }
 }
 
 @media (max-width: 360px) {
   .grid-stage {
     padding: 4px;
-    padding-top: 28px;
+    padding-top: 88px;
     padding-bottom: 55px;
   }
   .cards-grid {
-    --grid-overlap-v: 44px;
-    --grid-overlap-h: 27px;
-    max-width: 338px;
+    --grid-overlap-v: 40px;
+    --grid-overlap-h: 24px;
+    max-width: 312px;
     gap: 0px;
   }
   .card-text-overlay {
@@ -283,6 +283,6 @@
     -webkit-text-stroke: 3px;
   }
   .grid-card:nth-child(n+3) {
-    margin-top: -12px;
+    margin-top: -11px;
   }
 }

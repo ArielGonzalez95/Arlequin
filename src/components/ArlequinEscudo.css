@@ -67,7 +67,10 @@
 
 @media (max-width: 430px) {
   .arlequin-escudo .escudo-image {
-    width: 90px !important;
+    width: 72px !important;
+  }
+  .arlequin-escudo {
+    top: 10px !important;
   }
 }
 
