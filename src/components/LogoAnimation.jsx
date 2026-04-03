@@ -169,9 +169,14 @@ function LogoAnimation({
 
   const isArlequinCompleteRef = useRef(false);
 
-  const isMobileRef        = useRef(false);
-  const mobileLoopTimerRef = useRef(null);
-  const prevAnimStateRef   = useRef(ANIMATION_STATE.IDLE);
+  const isMobileRef           = useRef(false);
+  const mobileLoopTimerRef    = useRef(null);
+  const prevAnimStateRef      = useRef(ANIMATION_STATE.IDLE);
+  const pendingMobileClickRef = useRef(false);
+  const onClickRef            = useRef(onClick);
+
+  // Keep onClickRef always fresh so the RAF loop can call it without closure issues
+  useEffect(() => { onClickRef.current = onClick; }, [onClick]);
 
   const [isLoaded, setIsLoaded]               = useState(false);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
@@ -269,7 +274,7 @@ function LogoAnimation({
     }
 
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'low';
+    ctx.imageSmoothingQuality = 'high';
 
     // Draw the 3-layer isologo: cuerpo → estrellas → mascara
     // cuerpo and mascara share the same frame index.
@@ -415,39 +420,16 @@ function LogoAnimation({
         drawIsologo(cuerpoMascaraFrameRef.current, estrellasFrameRef.current);
       }
 
-      // ── Mobile auto-loop: detect state transitions ───────────────────────
-      if (isMobileRef.current) {
-        const cur = animationStateRef.current;
-        if (cur !== prevAnimStateRef.current) {
-          if (cur === ANIMATION_STATE.OPEN) {
-            // Mask fully open — hold for 4s then close
-            if (mobileLoopTimerRef.current) clearTimeout(mobileLoopTimerRef.current);
-            mobileLoopTimerRef.current = setTimeout(() => {
-              hoveredRef.current = false;
-              if (animationStateRef.current === ANIMATION_STATE.OPEN) {
-                animationStateRef.current = ANIMATION_STATE.CLOSING;
-              }
-            }, MOBILE_OPEN_HOLD_MS);
-          } else if (cur === ANIMATION_STATE.IDLE) {
-            // Mask fully closed — restart the loop after a short pause
-            if (mobileLoopTimerRef.current) clearTimeout(mobileLoopTimerRef.current);
-            mobileLoopTimerRef.current = setTimeout(() => {
-              hoveredRef.current = true;
-              animationStateRef.current = ANIMATION_STATE.OPENING;
-            }, MOBILE_LOOP_PAUSE_MS);
-          }
-          prevAnimStateRef.current = cur;
+      // ── Mobile tap: fire onClick when animation reaches OPEN ─────────────
+      if (isMobileRef.current && pendingMobileClickRef.current) {
+        if (animationStateRef.current === ANIMATION_STATE.OPEN) {
+          pendingMobileClickRef.current = false;
+          if (onClickRef.current) onClickRef.current();
         }
       }
 
       animationRef.current = requestAnimationFrame(animate);
     };
-
-    // On mobile, kick off the first cycle (only if idle — avoids restart on re-renders)
-    if (isMobileRef.current && animationStateRef.current === ANIMATION_STATE.IDLE) {
-      hoveredRef.current = true;
-      animationStateRef.current = ANIMATION_STATE.OPENING;
-    }
 
     animationRef.current = requestAnimationFrame(animate);
     return () => {
@@ -466,11 +448,26 @@ function LogoAnimation({
 
   const handleTouchEnd = useCallback((e) => {
     e.preventDefault();
-    handleClick();
+    if (isMobileRef.current) {
+      const cur = animationStateRef.current;
+      if (cur === ANIMATION_STATE.OPEN) {
+        // Ya está abierta — disparar acción de inmediato
+        if (onClickRef.current) onClickRef.current();
+      } else {
+        // Iniciar animación; onClick se disparará cuando llegue a OPEN
+        pendingMobileClickRef.current = true;
+        hoveredRef.current = true;
+        if (cur === ANIMATION_STATE.IDLE || cur === ANIMATION_STATE.CLOSING) {
+          animationStateRef.current = ANIMATION_STATE.OPENING;
+        }
+      }
+    } else {
+      handleClick();
+    }
   }, [handleClick]);
 
   const handleMouseMove = useCallback((event) => {
-    // On mobile, auto-loop controls the animation — ignore synthetic mouse events from iOS
+    // On mobile, touch controls the animation — ignore synthetic mouse events from iOS
     if (isMobileRef.current) return;
     const container = event.currentTarget;
     const rect = container.getBoundingClientRect();
