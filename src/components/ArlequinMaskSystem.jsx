@@ -126,6 +126,7 @@ function ArlequinMaskSystem({
     setPreloadCard(null);
     setSelectedCard(cardIndex);
     setCardFromGrid(true);
+    setIsCardExpanding(false);
     setStage(STAGES.CARD_DETAIL);
   }, []);
 
