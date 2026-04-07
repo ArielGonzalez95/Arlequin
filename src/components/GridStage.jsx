@@ -3,7 +3,7 @@ import './GridStage.css';
 
 const CARD_LABELS = ['¿Qué es Arlequín?', '¿Quiénes somos?', 'Servicios', 'Contacto'];
 
-function GridStage({ onCardClick, onCardPreClick, onExpandStart, isDarkMode }) {
+function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete, isDarkMode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   // idle → stacking → expanding → complete
@@ -57,7 +57,10 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, isDarkMode }) {
     const raf1 = requestAnimationFrame(() => {
       const raf2 = requestAnimationFrame(() => {
         setDealPhase('dealing');
-        dealTimerRef.current = setTimeout(() => setDealPhase('idle'), 700);
+        dealTimerRef.current = setTimeout(() => {
+          setDealPhase('idle');
+          if (onDealComplete) onDealComplete();
+        }, 700);
       });
       return () => cancelAnimationFrame(raf2);
     });

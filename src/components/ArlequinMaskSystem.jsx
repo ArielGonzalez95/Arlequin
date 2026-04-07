@@ -134,11 +134,15 @@ function ArlequinMaskSystem({
     setIsCardExpanding(true);
   }, []);
 
+  const handleDealComplete = useCallback(() => {
+    setIsCardExpanding(false);
+  }, []);
+
   // Handle close from individual card detail
   const handleCardDetailClose = useCallback(() => {
     setSelectedCard(null);
     setCardFromGrid(false);
-    setIsCardExpanding(false);
+    setIsCardExpanding(true);
     setStage(STAGES.GRID);
   }, []);
 
@@ -166,6 +170,7 @@ function ArlequinMaskSystem({
             onCardClick={handleGridCardClick}
             onCardPreClick={handleGridCardPreClick}
             onExpandStart={handleCardExpandStart}
+            onDealComplete={handleDealComplete}
             isDarkMode={isDarkMode}
           />
         );
