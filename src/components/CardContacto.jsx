@@ -4,204 +4,125 @@ import contactConfig from '../config/contact.json';
 import './CardQueEsArlequin.css';
 import './CardContacto.css';
 
-const CARD_FRAMES_CLEAR = [
-  '00000_arlequin_dorso_clear.avif',
-  '00001_arlequin_dorso_clear.avif',
-  '00002_arlequin_dorso_clear.avif',
-  '00003_arlequin_dorso_clear.avif',
-  '00004_arlequin_dorso_clear.avif',
-  '00005_arlequin_dorso_clear.avif',
-  '00006_arlequin_dorso_clear.avif',
-  '00007arlequin_contacto_dark.avif',
-  '00008arlequin_contacto_dark.avif',
-  '00009arlequin_contacto_dark.avif',
-  '00010arlequin_contacto_dark.avif',
-  '00011arlequin_contacto_dark.avif',
-  '00012arlequin_contacto_dark.avif',
-];
+// ── Frame builders ────────────────────────────────────────────────────────────
+const BASE = '/Cartas/Contacto/';
 
-const CARD_FRAMES_BLACK = [
-  '00000_arlequin_dorso_dark.avif',
-  '00001_arlequin_dorso_dark.avif',
-  '00002_arlequin_dorso_dark.avif',
-  '00003_arlequin_dorso_dark.avif',
-  '00004_arlequin_dorso_dark.avif',
-  '00005_arlequin_dorso_dark.avif',
-  '00006_arlequin_dorso_dark.avif',
-  '00007arlequin_contacto_dark.avif',
-  '00008arlequin_contacto_dark.avif',
-  '00009arlequin_contacto_dark.avif',
-  '00010arlequin_contacto_dark.avif',
-  '00011arlequin_contacto_dark.avif',
-  '00012arlequin_contacto_dark.avif',
-];
+function getOpenFrames(theme) {
+  // 00000-00006 dorso, 00007-00012 contacto  (13 frames, fixed at last)
+  return [
+    ...Array.from({ length: 7 }, (_, i) =>
+      `${BASE}${String(i).padStart(5, '0')}arlequin_dorso_${theme}.avif`),
+    ...Array.from({ length: 6 }, (_, i) =>
+      `${BASE}${String(i + 7).padStart(5, '0')}arlequin_contacto_${theme}.avif`),
+  ];
+}
 
-const CARD_FINAL_FRAME_CLEAR = 'arlequin_contacto_clear_boton.avif';
-const CARD_FINAL_FRAME_BLACK  = 'arlequin_contacto_dark_boton.avif';
+function getPostSendFrames(theme) {
+  // 00013-00018 contacto, 00019-00023 gracias, 00024 dorso  (12 frames, fixed at last)
+  const graSuffix = theme === 'dark' ? 'dorso_dark_gracias' : 'dorso_clear';
+  return [
+    ...Array.from({ length: 6 }, (_, i) =>
+      `${BASE}${String(i + 13).padStart(5, '0')}arlequin_contacto_${theme}.avif`),
+    ...Array.from({ length: 5 }, (_, i) =>
+      `${BASE}${String(i + 19).padStart(5, '0')}arlequin_${graSuffix}.avif`),
+    `${BASE}00024arlequin_dorso_${theme}.avif`,
+  ];
+}
 
-const FRENTE_FRAMES_CLEAR = [
-  '00007_arlequin_frente_clear.avif',
-  '00008_arlequin_frente_clear.avif',
-  '00009_arlequin_frente_clear.avif',
-  '00010_arlequin_frente_clear.avif',
-  '00011_arlequin_frente_clear.avif',
-  '00012_arlequin_frente_clear.avif',
-];
+function getCloseFrames(theme) {
+  // 00025-00030 frente, 00031-00035 contacto_dark / dorso_clear  (11 frames)
+  const lastSuffix = theme === 'dark' ? 'contacto_dark' : 'dorso_clear';
+  return [
+    ...Array.from({ length: 6 }, (_, i) =>
+      `${BASE}${String(i + 25).padStart(5, '0')}arlequin_frente_${theme}.avif`),
+    ...Array.from({ length: 5 }, (_, i) =>
+      `${BASE}${String(i + 31).padStart(5, '0')}arlequin_${lastSuffix}.avif`),
+  ];
+}
 
-const FRENTE_FRAMES_BLACK = [
-  '00007_arlequin_frente_dark.avif',
-  '00008_arlequin_frente_dark.avif',
-  '00009_arlequin_frente_dark.avif',
-  '00010_arlequin_frente_dark.avif',
-  '00011_arlequin_frente_dark.avif',
-  '00012_arlequin_frente_dark.avif',
-];
-
-const _frenteCache = {};
-
-// Post-send animation: 00013→00018 contacto, luego 00019→00023 dorso gracias
-const POST_SEND_FRAMES = [
-  '00013arlequin_contacto_dark.avif',
-  '00014arlequin_contacto_dark.avif',
-  '00015arlequin_contacto_dark.avif',
-  '00016arlequin_contacto_dark.avif',
-  '00017arlequin_contacto_dark.avif',
-  '00018arlequin_contacto_dark.avif',
-  '00019arlequin_dorso_dark_gracias.avif',
-  '00020arlequin_dorso_dark_gracias.avif',
-  '00021arlequin_dorso_dark_gracias.avif',
-  '00022arlequin_dorso_dark_gracias.avif',
-  '00023arlequin_dorso_dark_gracias.avif',
-];
-
-const _postSendCache = {};
-
-const CLOSE_FRAMES_CLEAR = [
-  '00013_arlequin_frente_clear.avif',
-  '00014_arlequin_frente_clear.avif',
-  '00015_arlequin_frente_clear.avif',
-  '00016_arlequin_frente_clear.avif',
-  '00017_arlequin_frente_clear.avif',
-  '00018_arlequin_frente_clear.avif',
-  '00019_arlequin_dorso_clear.avif',
-  '00020_arlequin_dorso_clear.avif',
-  '00021_arlequin_dorso_clear.avif',
-  '00022_arlequin_dorso_clear.avif',
-  '00023_arlequin_dorso_clear.avif',
-];
-
-const CLOSE_FRAMES_BLACK = [
-  '00013_arlequin_frente_dark.avif',
-  '00014_arlequin_frente_dark.avif',
-  '00015_arlequin_frente_dark.avif',
-  '00016_arlequin_frente_dark.avif',
-  '00017_arlequin_frente_dark.avif',
-  '00018_arlequin_frente_dark.avif',
-  '00019_arlequin_dorso_dark.avif',
-  '00020_arlequin_dorso_dark.avif',
-  '00021_arlequin_dorso_dark.avif',
-  '00022_arlequin_dorso_dark.avif',
-  '00023_arlequin_dorso_dark.avif',
-];
-
+// ── Button animation constants ────────────────────────────────────────────────
+const BTN_LOOP_END       = 71;
+const BTN_SEND_START     = 72;
+const BTN_SEND_END       = 168;
+const BTN_FRAME_DURATION = 40;
+const BTN_DISPLAY_WIDTH  = 500;
 const CARD_FRAME_DURATION = 40;
 const CARD_WIDTH  = 550;
 const CARD_HEIGHT = 680;
 
-// Button animation constants
-const BTN_LOOP_END        = 71;   // frames 0-71: loop idle
-const BTN_SEND_START      = 72;   // frames 72-168: send one-shot
-const BTN_SEND_END        = 168;
-const BTN_FRAME_DURATION  = 40;
-const BTN_DISPLAY_WIDTH   = 500;  // px — tamaño visual del botón animado
+// ── Image caches (persist across theme toggles) ───────────────────────────────
+const _openCache     = {};
+const _postSendCache = {};
+const _closeCache    = {};
+const _btnCache      = {};
 
-const _openCache  = {};
-const _closeCache = {};
-const _btnCache   = {};
-
+// ── Component ─────────────────────────────────────────────────────────────────
 function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false }) {
-  const canvasRef             = useRef(null);
-  const imagesRef             = useRef([]);
-  const closeImagesRef        = useRef([]);
-  const animationRef          = useRef(null);
-  const currentFrameRef       = useRef(0);
-  const lastFrameTimeRef      = useRef(0);
-  const isCompleteRef         = useRef(false);
-  const closeFrameRef         = useRef(0);
-  const lastCloseFrameTimeRef = useRef(0);
-  const isLoadedRef           = useRef(false);
+  const canvasRef         = useRef(null);
+  const openImagesRef     = useRef([]);
+  const postSendImagesRef = useRef([]);
+  const closeImagesRef    = useRef([]);
+  const animRAFRef        = useRef(null);
+  const frameIdxRef       = useRef(0);
+  const lastTimeRef       = useRef(0);
 
-  // Button animation refs
+  // Button refs
   const btnCanvasRef     = useRef(null);
   const btnLoopFramesRef = useRef([]);
   const btnSendFramesRef = useRef([]);
   const btnAnimRef       = useRef(null);
   const btnFrameRef      = useRef(0);
-  const btnPhaseRef      = useRef('loop'); // 'loop' | 'send' | 'done'
+  const btnPhaseRef      = useRef('loop');
   const btnLastTimeRef   = useRef(0);
 
-  // Post-send animation refs
-  const postSendAnimRef    = useRef(null);
-  const postSendFrameRef   = useRef(0);
-  const postSendLastRef    = useRef(0);
-  const frenteFramesRef    = useRef([]);
-  const postSendImagesRef  = useRef([]);
+  const winClickRef = useRef(null);
+  const winMoveRef  = useRef(null);
+  const moveRafRef  = useRef(null);
 
-  const [isLoaded,          setIsLoaded]          = useState(false);
-  const [canStartAnimation, setCanStartAnimation] = useState(false);
-  const [showContent,       setShowContent]       = useState(false);
-  const [isClosing,         setIsClosing]         = useState(false);
-  const [nombre,            setNombre]            = useState('');
-  const [mail,              setMail]              = useState('');
-  const [telefono,          setTelefono]          = useState('');
-  const [descripcion,       setDescripcion]       = useState('');
-  const [isScalingDown,     setIsScalingDown]     = useState(false);
-  const [enviando,          setEnviando]          = useState(false);
-  const [enviado,           setEnviado]           = useState(false);
-  const [errorEnvio,        setErrorEnvio]        = useState(false);
-  const [isBtnLoaded,       setIsBtnLoaded]       = useState(false);
-  const [btnPhaseDone,      setBtnPhaseDone]      = useState(false);
-  const [showFijaText,      setShowFijaText]      = useState(false);
+  // 'loading' | 'opening' | 'fixedForm' | 'postSend' | 'fixedGracias' | 'closing'
+  const [animPhase,    setAnimPhase]    = useState('loading');
+  const [isLoaded,     setIsLoaded]     = useState(false);
+  const [showContent,  setShowContent]  = useState(false);
+  const [showGracias,  setShowGracias]  = useState(false);
+  const [isScalingDown,setIsScalingDown]= useState(false);
+  const [isBtnLoaded,  setIsBtnLoaded]  = useState(false);
+  const [btnPhaseDone, setBtnPhaseDone] = useState(false);
 
-  const cardFrames     = isDarkMode ? CARD_FRAMES_BLACK    : CARD_FRAMES_CLEAR;
-  const closeFrames    = isDarkMode ? CLOSE_FRAMES_BLACK   : CLOSE_FRAMES_CLEAR;
-  const cardFinalFrame = isDarkMode ? CARD_FINAL_FRAME_BLACK : CARD_FINAL_FRAME_CLEAR;
-  const frenteFrames   = isDarkMode ? FRENTE_FRAMES_BLACK    : FRENTE_FRAMES_CLEAR;
-  const totalFrames    = cardFrames.length;
+  // Form state
+  const [nombre,      setNombre]      = useState('');
+  const [mail,        setMail]        = useState('');
+  const [telefono,    setTelefono]    = useState('');
+  const [descripcion, setDescripcion] = useState('');
+  const [enviando,    setEnviando]    = useState(false);
+  const [enviado,     setEnviado]     = useState(false);
+  const [errorEnvio,  setErrorEnvio]  = useState(false);
 
+  const theme = isDarkMode ? 'dark' : 'clear';
+
+  // ── Handlers ────────────────────────────────────────────────────────────────
   const handleClose = () => {
-    if (isClosing) return;
+    if (animPhase === 'closing') return;
     if (onCloseStart) onCloseStart();
     setShowContent(false);
-    setIsClosing(true);
+    setShowGracias(false);
+    setAnimPhase('closing');
   };
-
 
   const handleEnviar = async () => {
     if (enviando || enviado) return;
     setEnviando(true);
     setErrorEnvio(false);
-
     const { serviceId, templateId, publicKey } = contactConfig.emailjs;
-
     try {
-      await emailjs.send(
-        serviceId,
-        templateId,
-        {
-          to_email:   contactConfig.destinatario,
-          from_name:  nombre,
-          from_email: mail,
-          telefono,
-          descripcion,
-        },
-        publicKey
-      );
+      await emailjs.send(serviceId, templateId, {
+        to_email:   contactConfig.destinatario,
+        from_name:  nombre,
+        from_email: mail,
+        telefono,
+        descripcion,
+      }, publicKey);
       setEnviado(true);
-      setNombre('');
-      setMail('');
-      setTelefono('');
-      setDescripcion('');
+      setNombre(''); setMail(''); setTelefono(''); setDescripcion('');
     } catch (err) {
       console.error('Error al enviar:', err);
       setErrorEnvio(true);
@@ -211,12 +132,8 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
   };
 
   const mailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail.trim());
-
-  // Teléfono Argentina: acepta formatos con/sin +54, con/sin 0, con/sin 9 móvil.
-  // Extrae solo dígitos y valida 8–13 dígitos (cubre local, sin cód país, con cód país).
-  const telValido = /^\+?[\d\s\-().]{8,20}$/.test(telefono.trim()) &&
+  const telValido  = /^\+?[\d\s\-().]{8,20}$/.test(telefono.trim()) &&
     telefono.replace(/\D/g, '').length >= 8;
-
   const formValido = nombre.trim() !== '' && mailValido && telValido && descripcion.trim() !== '';
 
   const handleBtnClick = () => {
@@ -226,11 +143,6 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     btnLastTimeRef.current = 0;
     handleEnviar();
   };
-
-  // Refs para window listeners — siempre tienen los valores actuales sin stale closure
-  const winClickRef = useRef(null);
-  const winMoveRef  = useRef(null);
-  const moveRafRef  = useRef(null);
 
   winClickRef.current = (e) => {
     if (!showContent || btnPhaseDone || !isBtnLoaded || !formValido || enviando || enviado) return;
@@ -270,136 +182,146 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     });
   };
 
-  // Start open animation
+  // ── Preload all card frames ──────────────────────────────────────────────────
   useEffect(() => {
-    if (!isLoaded) return;
-    if (fromGrid) {
-      setCanStartAnimation(true);
-    } else {
-      const t = setTimeout(() => setCanStartAnimation(true), 600);
-      return () => clearTimeout(t);
-    }
-  }, [isLoaded, fromGrid]);
+    const load = async () => {
+      const loadList = (list) => Promise.all(list.map(src => new Promise(resolve => {
+        const img = new Image();
+        img.onload  = () => img.decode().then(() => resolve(img)).catch(() => resolve(img));
+        img.onerror = () => resolve(null);
+        img.src = src;
+      })));
 
-  // Preload card frames
-  useEffect(() => {
-    const wasLoaded = isLoadedRef.current;
+      const openList     = getOpenFrames(theme);
+      const postSendList = getPostSendFrames(theme);
+      const closeList    = getCloseFrames(theme);
 
-    const loadImages = async () => {
-      const themeKey = isDarkMode ? 'dark' : 'clear';
-
-      if (_openCache[themeKey]) {
-        imagesRef.current = _openCache[themeKey];
-        closeImagesRef.current = _closeCache[themeKey];
-        if (_frenteCache[themeKey]) {
-          frenteFramesRef.current = _frenteCache[themeKey];
-        }
-        if (!wasLoaded && !preload) {
-          isLoadedRef.current = true;
-          setIsLoaded(true);
-        } else if (isCompleteRef.current && !preload) {
-          const canvas = canvasRef.current;
-          const ctx    = canvas.getContext('2d');
-          const finalFrame = _openCache[themeKey][_openCache[themeKey].length - 1];
-          if (finalFrame) {
-            ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-            ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-          }
-        }
-        return;
-      }
-
-      const openPromises = [...cardFrames, cardFinalFrame].map(file =>
-        new Promise(resolve => {
-          const img = new Image();
-          img.onload  = () => img.decode().then(() => resolve(img)).catch(() => resolve(img));
-          img.onerror = () => resolve(null);
-          img.src = `/Cartas/${file}`;
-        })
-      );
-      const closePromises = closeFrames.map(file =>
-        new Promise(resolve => {
-          const img = new Image();
-          img.onload  = () => img.decode().then(() => resolve(img)).catch(() => resolve(img));
-          img.onerror = () => resolve(null);
-          img.src = `/Cartas/${file}`;
-        })
-      );
-      const [openResults, closeResults] = await Promise.all([
-        Promise.all(openPromises),
-        Promise.all(closePromises),
+      const [openRes, postRes, closeRes] = await Promise.all([
+        _openCache[theme]     ? Promise.resolve(_openCache[theme])     : loadList(openList),
+        _postSendCache[theme] ? Promise.resolve(_postSendCache[theme]) : loadList(postSendList),
+        _closeCache[theme]    ? Promise.resolve(_closeCache[theme])    : loadList(closeList),
       ]);
 
-      _openCache[themeKey]   = openResults;
-      _closeCache[themeKey]  = closeResults;
-      imagesRef.current      = openResults;
-      closeImagesRef.current = closeResults;
+      _openCache[theme]     = openRes;
+      _postSendCache[theme] = postRes;
+      _closeCache[theme]    = closeRes;
 
-      // Precarga frames de frente (animación post-envío)
-      if (_frenteCache[themeKey]) {
-        frenteFramesRef.current = _frenteCache[themeKey];
-      } else {
-        Promise.all(frenteFrames.map(file => new Promise(resolve => {
-          const img = new Image();
-          img.onload  = () => img.decode().then(() => resolve(img)).catch(() => resolve(img));
-          img.onerror = () => resolve(null);
-          img.src = `/Cartas/${file}`;
-        }))).then(results => {
-          _frenteCache[themeKey] = results;
-          frenteFramesRef.current = results;
-        });
-      }
+      openImagesRef.current     = openRes;
+      postSendImagesRef.current = postRes;
+      closeImagesRef.current    = closeRes;
 
-      // Precarga frames de animación post-send (contacto 13→18 + gracias 19→23)
-      if (_postSendCache['dark']) {
-        postSendImagesRef.current = _postSendCache['dark'];
-      } else {
-        Promise.all(POST_SEND_FRAMES.map(file => new Promise(resolve => {
-          const img = new Image();
-          img.onload  = () => img.decode().then(() => resolve(img)).catch(() => resolve(img));
-          img.onerror = () => resolve(null);
-          img.src = `/Cartas/${file}`;
-        }))).then(results => {
-          _postSendCache['dark'] = results;
-          postSendImagesRef.current = results;
-        });
-      }
+      if (!preload) setIsLoaded(true);
+    };
+    load();
+  }, [theme, preload]);
 
-      if (!wasLoaded && !preload) {
-        isLoadedRef.current = true;
-        setIsLoaded(true);
-      } else if (isCompleteRef.current && !preload) {
-        const canvas = canvasRef.current;
-        const ctx    = canvas.getContext('2d');
-        const finalFrame = openResults[openResults.length - 1];
-        if (finalFrame) {
-          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-          ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
+  // ── Start opening animation once loaded ─────────────────────────────────────
+  useEffect(() => {
+    if (!isLoaded) return;
+    const delay = fromGrid ? 0 : 600;
+    const t = setTimeout(() => setAnimPhase('opening'), delay);
+    return () => clearTimeout(t);
+  }, [isLoaded, fromGrid]);
+
+  // ── Canvas setup ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!isLoaded) return;
+    const canvas = canvasRef.current;
+    const ctx    = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = Math.round(CARD_WIDTH * dpr);
+    canvas.height = Math.round(CARD_HEIGHT * dpr);
+    canvas.style.width  = `${CARD_WIDTH}px`;
+    canvas.style.height = `${CARD_HEIGHT}px`;
+    ctx.scale(dpr, dpr);
+    const first = openImagesRef.current[0];
+    if (first) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(first, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+  }, [isLoaded]);
+
+  // ── Main animation loop ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (animPhase === 'loading' || animPhase === 'fixedForm' || animPhase === 'fixedGracias') return;
+
+    const canvas = canvasRef.current;
+    const ctx    = canvas.getContext('2d');
+
+    let frames;
+    if (animPhase === 'opening')  frames = openImagesRef.current;
+    if (animPhase === 'postSend') frames = postSendImagesRef.current;
+    if (animPhase === 'closing')  frames = closeImagesRef.current;
+
+    frameIdxRef.current = 0;
+    lastTimeRef.current = 0;
+
+    // Draw first frame immediately
+    if (frames[0]) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frames[0], 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+
+    const animate = (timestamp) => {
+      if (lastTimeRef.current === 0) lastTimeRef.current = timestamp;
+      if (timestamp - lastTimeRef.current >= CARD_FRAME_DURATION) {
+        lastTimeRef.current += CARD_FRAME_DURATION;
+        const idx = frameIdxRef.current;
+        const img = frames[idx];
+        if (img) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(img, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+
+        if (idx < frames.length - 1) {
+          frameIdxRef.current++;
+          animRAFRef.current = requestAnimationFrame(animate);
+        } else {
+          // Animation complete
+          if (animPhase === 'opening')  { setAnimPhase('fixedForm');    setShowContent(true); }
+          if (animPhase === 'postSend') { setAnimPhase('fixedGracias'); setShowGracias(true); }
+          if (animPhase === 'closing')  {
+            setIsScalingDown(true);
+            setTimeout(() => onClose(), 400);
+          }
         }
+      } else {
+        animRAFRef.current = requestAnimationFrame(animate);
       }
     };
-    loadImages();
-  }, [isDarkMode, preload]);
 
-  // Preload button frames
+    animRAFRef.current = requestAnimationFrame(animate);
+    return () => { if (animRAFRef.current) cancelAnimationFrame(animRAFRef.current); };
+  }, [animPhase]);
+
+  // ── Trigger postSend when button animation completes ─────────────────────────
   useEffect(() => {
-    const theme = isDarkMode ? 'dark' : 'clear';
-    let cancelled = false;
+    if (!btnPhaseDone) return;
+    setShowContent(false);
+    setAnimPhase('postSend');
+  }, [btnPhaseDone]);
 
+  // ── Console helper to test post-send animation ───────────────────────────────
+  useEffect(() => {
+    window.__testEnvio = () => {
+      if (animPhase !== 'fixedForm') {
+        console.warn('__testEnvio: debe estar en la carta fija (fixedForm)');
+        return;
+      }
+      setShowContent(false);
+      setAnimPhase('postSend');
+    };
+    return () => { delete window.__testEnvio; };
+  }, [animPhase]);
+
+  // ── Preload button frames ────────────────────────────────────────────────────
+  useEffect(() => {
+    const t = theme;
+    let cancelled = false;
     setIsBtnLoaded(false);
     setBtnPhaseDone(false);
     btnPhaseRef.current = 'loop';
     btnFrameRef.current = 0;
 
-    if (_btnCache[theme]) {
-      btnLoopFramesRef.current = _btnCache[theme].loop;
-      btnSendFramesRef.current = _btnCache[theme].send;
+    if (_btnCache[t]) {
+      btnLoopFramesRef.current = _btnCache[t].loop;
+      btnSendFramesRef.current = _btnCache[t].send;
       setIsBtnLoaded(true);
       return () => { cancelled = true; };
     }
 
-    const folder = `/NEW_animacion_boton_enviar_${theme}/NEW_animacion_boton_enviar_${theme}/`;
-
+    const folder = `/NEW_animacion_boton_enviar_${t}/NEW_animacion_boton_enviar_${t}/`;
     const loopPromises = Array.from({ length: BTN_LOOP_END + 1 }, (_, i) =>
       new Promise(resolve => {
         const img = new Image();
@@ -408,185 +330,28 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
         img.src = `${folder}animacion_boton_enviar_${String(i).padStart(5, '0')}_loop.avif`;
       })
     );
-
     const sendPromises = Array.from({ length: BTN_SEND_END - BTN_SEND_START + 1 }, (_, i) => {
       const n = BTN_SEND_START + i;
       return new Promise(resolve => {
         const img = new Image();
         img.onload  = () => img.decode().then(() => resolve(img)).catch(() => resolve(img));
         img.onerror = () => resolve(null);
-        img.src = `${folder}animacion_boton_enviar_${theme}_${String(n).padStart(5, '0')}.avif`;
+        img.src = `${folder}animacion_boton_enviar_${t}_${String(n).padStart(5, '0')}.avif`;
       });
     });
 
     Promise.all([Promise.all(loopPromises), Promise.all(sendPromises)]).then(([loop, send]) => {
-      if (cancelled) return; // tema cambió mientras cargaba — descartar
-      _btnCache[theme] = { loop, send };
+      if (cancelled) return;
+      _btnCache[t] = { loop, send };
       btnLoopFramesRef.current = loop;
       btnSendFramesRef.current = send;
       setIsBtnLoaded(true);
     });
 
     return () => { cancelled = true; };
-  }, [isDarkMode]);
+  }, [theme]);
 
-  // Draw first card frame when loaded
-  useEffect(() => {
-    if (!isLoaded) return;
-    const canvas = canvasRef.current;
-    const ctx    = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.round(CARD_WIDTH * dpr);
-    canvas.height = Math.round(CARD_HEIGHT * dpr);
-    canvas.style.width = `${CARD_WIDTH}px`;
-    canvas.style.height = `${CARD_HEIGHT}px`;
-    ctx.scale(dpr, dpr);
-    const first = imagesRef.current[0];
-    if (first) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(first, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
-  }, [isLoaded]);
-
-  // Open animation loop
-  useEffect(() => {
-    if (!isLoaded || !canStartAnimation || isClosing) return;
-
-    const canvas = canvasRef.current;
-    const ctx    = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.round(CARD_WIDTH * dpr);
-    canvas.height = Math.round(CARD_HEIGHT * dpr);
-    canvas.style.width = `${CARD_WIDTH}px`;
-    canvas.style.height = `${CARD_HEIGHT}px`;
-    ctx.scale(dpr, dpr);
-
-    const drawFrame = () => {
-      if (isCompleteRef.current) {
-        const final = imagesRef.current[totalFrames];
-        if (final) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(final, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
-        setShowContent(true);
-        return;
-      }
-      const frame = imagesRef.current[currentFrameRef.current];
-      if (frame) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
-    };
-
-    drawFrame();
-
-    const animate = (timestamp) => {
-      if (timestamp - lastFrameTimeRef.current >= CARD_FRAME_DURATION) {
-        if (currentFrameRef.current < totalFrames - 1) {
-          currentFrameRef.current++;
-        } else {
-          isCompleteRef.current = true;
-        }
-        lastFrameTimeRef.current += CARD_FRAME_DURATION;
-        drawFrame();
-      }
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    animationRef.current = requestAnimationFrame(animate);
-    return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
-  }, [isLoaded, canStartAnimation, totalFrames, isClosing]);
-
-  // Close animation loop
-  useEffect(() => {
-    if (!isClosing || !isLoaded) return;
-    if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    if (btnAnimRef.current) cancelAnimationFrame(btnAnimRef.current);
-    if (postSendAnimRef.current) cancelAnimationFrame(postSendAnimRef.current);
-
-    const canvas = canvasRef.current;
-    const ctx    = canvas.getContext('2d');
-    closeFrameRef.current         = 0;
-    lastCloseFrameTimeRef.current = 0;
-    const frames = closeImagesRef.current;
-
-    const animate = (timestamp) => {
-      if (timestamp - lastCloseFrameTimeRef.current >= CARD_FRAME_DURATION) {
-        const frame = frames[closeFrameRef.current];
-        if (frame) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
-        lastCloseFrameTimeRef.current += CARD_FRAME_DURATION;
-        if (closeFrameRef.current < frames.length - 1) {
-          closeFrameRef.current++;
-          animationRef.current = requestAnimationFrame(animate);
-        } else {
-          const frame0 = imagesRef.current[0];
-          if (frame0) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frame0, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
-          setIsScalingDown(true);
-          setTimeout(() => onClose(), 400);
-        }
-      } else {
-        animationRef.current = requestAnimationFrame(animate);
-      }
-    };
-
-    animationRef.current = requestAnimationFrame(animate);
-    return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
-  }, [isClosing, isLoaded]);
-
-  // Post-send animation: 00013→00018 contacto, 00019→00023 gracias, luego carta fija frente
-  useEffect(() => {
-    if (!btnPhaseDone) return;
-    setShowContent(false);
-
-    if (animationRef.current) { cancelAnimationFrame(animationRef.current); animationRef.current = null; }
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    const drawFija = () => {
-      const frames = frenteFramesRef.current;
-      const fija = frames[frames.length - 1]; // 00012_arlequin_frente con mensaje
-      if (fija) {
-        ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-        ctx.drawImage(fija, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-        setShowFijaText(true);
-      } else {
-        postSendAnimRef.current = requestAnimationFrame(drawFija);
-      }
-    };
-
-    // Anima frames POST_SEND_FRAMES en orden (00013→00018 contacto, 00019→00023 gracias)
-    postSendFrameRef.current = 0;
-    postSendLastRef.current  = 0;
-
-    const animatePostSend = (timestamp) => {
-      const frames = postSendImagesRef.current;
-      if (!frames.length) {
-        postSendAnimRef.current = requestAnimationFrame(animatePostSend);
-        return;
-      }
-      if (postSendLastRef.current === 0) postSendLastRef.current = timestamp;
-      if (timestamp - postSendLastRef.current >= CARD_FRAME_DURATION) {
-        postSendLastRef.current += CARD_FRAME_DURATION;
-        const img = frames[postSendFrameRef.current];
-        if (img) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(img, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
-        if (postSendFrameRef.current < frames.length - 1) {
-          postSendFrameRef.current++;
-          postSendAnimRef.current = requestAnimationFrame(animatePostSend);
-        } else {
-          drawFija();
-        }
-      } else {
-        postSendAnimRef.current = requestAnimationFrame(animatePostSend);
-      }
-    };
-
-    postSendAnimRef.current = requestAnimationFrame(animatePostSend);
-    return () => { if (postSendAnimRef.current) cancelAnimationFrame(postSendAnimRef.current); };
-  }, [btnPhaseDone]);
-
-  // Función de consola para testear animación post-envío sin enviar email
-  useEffect(() => {
-    window.__testEnvio = () => {
-      btnPhaseRef.current = 'done';
-      setBtnPhaseDone(true);
-    };
-    return () => { delete window.__testEnvio; };
-  }, []);
-
-  // Button animation RAF loop
+  // ── Button animation RAF ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!showContent || !isBtnLoaded) return;
     const canvas = btnCanvasRef.current;
@@ -609,20 +374,15 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     btnFrameRef.current = 0;
     setBtnPhaseDone(false);
 
-    // Dibuja frame 0 inmediatamente — sin esperar el primer tick del RAF
     ctx.clearRect(0, 0, w, h);
     ctx.drawImage(firstFrame, 0, 0, w, h);
 
     const animate = (timestamp) => {
-      // Inicializa lastTime en el primer tick real para evitar burst inicial
       if (btnLastTimeRef.current === 0) btnLastTimeRef.current = timestamp;
-
       if (timestamp - btnLastTimeRef.current >= BTN_FRAME_DURATION) {
         btnLastTimeRef.current += BTN_FRAME_DURATION;
-
         const phase = btnPhaseRef.current;
         let frame;
-
         if (phase === 'loop') {
           frame = btnLoopFramesRef.current[btnFrameRef.current];
           btnFrameRef.current = (btnFrameRef.current + 1) % (BTN_LOOP_END + 1);
@@ -637,22 +397,20 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
             return;
           }
         }
-
         if (frame) { ctx.clearRect(0, 0, w, h); ctx.drawImage(frame, 0, 0, w, h); }
       }
       btnAnimRef.current = requestAnimationFrame(animate);
     };
 
-    btnLastTimeRef.current = 0; // reset — el animate lo inicializa en el primer tick
+    btnLastTimeRef.current = 0;
     btnAnimRef.current = requestAnimationFrame(animate);
     return () => { if (btnAnimRef.current) cancelAnimationFrame(btnAnimRef.current); };
   }, [showContent, isBtnLoaded]);
 
-  // Window-level click + mousemove para detectar clicks en el canvas del botón
-  // (el canvas puede estar fuera del div raíz por el overflow, así que no burbujea)
+  // ── Window click + mousemove para botón ──────────────────────────────────────
   useEffect(() => {
     if (!showContent || !isBtnLoaded) return;
-    const onClick    = (e) => winClickRef.current?.(e);
+    const onClick     = (e) => winClickRef.current?.(e);
     const onMouseMove = (e) => winMoveRef.current?.(e);
     window.addEventListener('click',     onClick);
     window.addEventListener('mousemove', onMouseMove);
@@ -664,6 +422,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     };
   }, [showContent, isBtnLoaded]);
 
+  // ── Render ───────────────────────────────────────────────────────────────────
   if (preload) return null;
   if (!isLoaded) return <div className="card-que-es-arlequin loading" />;
 
@@ -683,7 +442,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
         style={!isScalingDown && fromGrid ? { animation: 'none' } : undefined}
       />
 
-      {showFijaText && (
+      {showGracias && (
         <div className="contacto-fija-text">
           <span>Gracias por tu Msj ⭐</span>
           <span>Nos comunicaremos</span>
@@ -743,7 +502,6 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
             </div>
           </div>
 
-          {/* Canvas visual del botón */}
           <div className="contacto-send-area">
             {errorEnvio && <span className="contacto-status contacto-status--error">Error al enviar</span>}
             {!btnPhaseDone && isBtnLoaded && (
@@ -758,7 +516,6 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
               />
             )}
           </div>
-
         </>
       )}
     </div>
