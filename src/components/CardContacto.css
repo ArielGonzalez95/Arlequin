@@ -196,7 +196,7 @@ textarea.contacto-field {
 .contacto-fija-text span {
   font-family: 'CinzelDecorative-Bold', serif;
   font-size: 20px;
-  color: #ffffff;
+  color: inherit;
   text-align: center;
   white-space: nowrap;
 }
