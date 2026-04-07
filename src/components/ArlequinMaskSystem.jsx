@@ -40,6 +40,7 @@ function ArlequinMaskSystem({
   const [cardFromGrid, setCardFromGrid] = useState(false);
   const [isShrinkingOut, setIsShrinkingOut] = useState(false);
   const [preloadCard, setPreloadCard] = useState(null);
+  const [isCardExpanding, setIsCardExpanding] = useState(false);
   // Use ref for tracking "NO" flow - more reliable than state
   const pendingCardStageRef = useRef(false);
 
@@ -128,10 +129,15 @@ function ArlequinMaskSystem({
     setStage(STAGES.CARD_DETAIL);
   }, []);
 
+  const handleCardExpandStart = useCallback(() => {
+    setIsCardExpanding(true);
+  }, []);
+
   // Handle close from individual card detail
   const handleCardDetailClose = useCallback(() => {
     setSelectedCard(null);
     setCardFromGrid(false);
+    setIsCardExpanding(false);
     setStage(STAGES.GRID);
   }, []);
 
@@ -158,6 +164,7 @@ function ArlequinMaskSystem({
           <GridStage
             onCardClick={handleGridCardClick}
             onCardPreClick={handleGridCardPreClick}
+            onExpandStart={handleCardExpandStart}
             isDarkMode={isDarkMode}
           />
         );
@@ -179,7 +186,7 @@ function ArlequinMaskSystem({
     }
   };
 
-  const showEscudo = phase === 'contentVisible';
+  const showEscudo = phase === 'contentVisible' && !isCardExpanding;
 
   return (
     <div className="arlequin-mask-system ready">

@@ -3,7 +3,7 @@ import './GridStage.css';
 
 const CARD_LABELS = ['¿Qué es Arlequín?', '¿Quiénes somos?', 'Servicios', 'Contacto'];
 
-function GridStage({ onCardClick, onCardPreClick, isDarkMode }) {
+function GridStage({ onCardClick, onCardPreClick, onExpandStart, isDarkMode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   // idle → stacking → expanding → complete
@@ -88,6 +88,7 @@ function GridStage({ onCardClick, onCardPreClick, isDarkMode }) {
     const scaleToComponent = targetWidth / rect.width;
 
     if (onCardPreClick) onCardPreClick(index + 1);
+    if (onExpandStart) onExpandStart();
 
     setSelectedCard(index);
     setExpandTransform({
