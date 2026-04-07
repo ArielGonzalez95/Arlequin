@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './ArlequinEscudo.css';
 
-function ArlequinEscudo({ onClick, isDarkMode }) {
+function ArlequinEscudo({ onClick, isDarkMode, minimized = false }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const themeSuffix = isDarkMode ? 'dark' : 'clear';
 
@@ -18,7 +18,7 @@ function ArlequinEscudo({ onClick, isDarkMode }) {
   }
 
   return (
-    <div className="arlequin-escudo" onClick={onClick} title="Volver al inicio">
+    <div className={`arlequin-escudo${minimized ? ' minimized' : ''}`} onClick={onClick} title="Volver al inicio">
       <img 
         src={`/Cartas/arlequin_escudo_${themeSuffix}.avif`} 
         alt="Escudo"

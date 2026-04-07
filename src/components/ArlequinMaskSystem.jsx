@@ -196,7 +196,7 @@ function ArlequinMaskSystem({
     }
   };
 
-  const showEscudo = phase === 'contentVisible' && !isCardExpanding;
+  const showEscudo = phase === 'contentVisible';
 
   return (
     <div className="arlequin-mask-system ready">
@@ -208,6 +208,7 @@ function ArlequinMaskSystem({
         <ArlequinEscudo
           onClick={handleEscudoClick}
           isDarkMode={isDarkMode}
+          minimized={isCardExpanding}
         />
       )}
 
