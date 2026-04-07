@@ -420,11 +420,14 @@ function LogoAnimation({
         drawIsologo(cuerpoMascaraFrameRef.current, estrellasFrameRef.current);
       }
 
-      // ── Mobile tap: fire onClick when animation reaches OPEN ─────────────
+      // ── Mobile tap: fire onClick after holding OPEN for MOBILE_OPEN_HOLD_MS ──
       if (isMobileRef.current && pendingMobileClickRef.current) {
         if (animationStateRef.current === ANIMATION_STATE.OPEN) {
           pendingMobileClickRef.current = false;
-          if (onClickRef.current) onClickRef.current();
+          mobileLoopTimerRef.current = setTimeout(() => {
+            mobileLoopTimerRef.current = null;
+            if (onClickRef.current) onClickRef.current();
+          }, MOBILE_OPEN_HOLD_MS);
         }
       }
 
