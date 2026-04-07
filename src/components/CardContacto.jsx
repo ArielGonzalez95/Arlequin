@@ -30,13 +30,14 @@ function getPostSendFrames(theme) {
 }
 
 function getCloseFrames(theme) {
-  // 00025-00030 frente, 00031-00035 contacto_dark / dorso_clear  (11 frames)
+  // 00025-00030 frente, 00031-00035 contacto_dark / dorso_clear, 00000 dorso  (12 frames)
   const lastSuffix = theme === 'dark' ? 'contacto_dark' : 'dorso_clear';
   return [
     ...Array.from({ length: 6 }, (_, i) =>
       `${BASE}${String(i + 25).padStart(5, '0')}arlequin_frente_${theme}.avif`),
     ...Array.from({ length: 5 }, (_, i) =>
       `${BASE}${String(i + 31).padStart(5, '0')}arlequin_${lastSuffix}.avif`),
+    `${BASE}00000arlequin_dorso_${theme}.avif`,
   ];
 }
 
@@ -443,7 +444,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
       />
 
       {showGracias && (
-        <div className="contacto-fija-text">
+        <div className="contacto-fija-text" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
           <span>Gracias por tu Msj ⭐</span>
           <span>Nos comunicaremos</span>
           <span>a la Brevedad 🎭</span>
