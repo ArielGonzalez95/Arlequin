@@ -111,7 +111,7 @@ const PAGES = [
   },
 ];
 
-function CardQuienesSomos({ isDarkMode, onClose, fromGrid = false, preload = false }) {
+function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false }) {
   const canvasRef = useRef(null);
   const imagesRef = useRef([]);
   const closeImagesRef = useRef([]);
@@ -147,6 +147,7 @@ function CardQuienesSomos({ isDarkMode, onClose, fromGrid = false, preload = fal
 
   const handleClose = () => {
     if (isClosing) return;
+    if (onCloseStart) onCloseStart();
     setShowContent(false);
     setIsClosing(true);
   };

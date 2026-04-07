@@ -152,7 +152,7 @@ const page7Lines = [
 const cardTexts = [page1Lines, page2Lines, page3Lines, page4Lines, page5Lines, page6Lines, page7Lines];
 
 // ─────────────────────────────────────────────────────────────────
-function CardServicios({ isDarkMode, onClose, fromGrid = false, preload = false }) {
+function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false }) {
   const canvasRef          = useRef(null);
   const imagesRef          = useRef([]);
   const closeImagesRef     = useRef([]);
@@ -186,6 +186,7 @@ function CardServicios({ isDarkMode, onClose, fromGrid = false, preload = false 
   };
   const handleClose = () => {
     if (isClosing) return;
+    if (onCloseStart) onCloseStart();
     setShowNavIcons(false);
     setIsClosing(true);
   };

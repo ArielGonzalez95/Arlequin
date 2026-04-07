@@ -115,7 +115,7 @@ const page1Lines = [
 
 const cardTexts = [page1Lines, page2Lines, page3Lines];
 
-function CardQueEsArlequin({ isDarkMode, onClose, fromGrid = false, preload = false }) {
+function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false }) {
   const canvasRef = useRef(null);
   const imagesRef = useRef([]);
   const closeImagesRef = useRef([]);
@@ -151,6 +151,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, fromGrid = false, preload = fa
 
   const handleClose = () => {
     if (isClosing) return;
+    if (onCloseStart) onCloseStart();
     setShowNavIcons(false);
     setIsClosing(true);
   };

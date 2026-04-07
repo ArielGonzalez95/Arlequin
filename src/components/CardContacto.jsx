@@ -103,7 +103,7 @@ const _openCache  = {};
 const _closeCache = {};
 const _btnCache   = {};
 
-function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }) {
+function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false }) {
   const canvasRef             = useRef(null);
   const imagesRef             = useRef([]);
   const closeImagesRef        = useRef([]);
@@ -154,6 +154,7 @@ function CardContacto({ isDarkMode, onClose, fromGrid = false, preload = false }
 
   const handleClose = () => {
     if (isClosing) return;
+    if (onCloseStart) onCloseStart();
     setShowContent(false);
     setIsClosing(true);
   };
