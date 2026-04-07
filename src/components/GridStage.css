@@ -184,8 +184,8 @@
     padding-bottom: 92px;
   }
   .cards-grid {
-    max-width: 390px;
-    gap: 12px;
+    max-width: 470px;
+    gap: 8px;
   }
   .card-text-overlay {
     font-size: 16px;
@@ -200,8 +200,8 @@
     padding-bottom: 90px;
   }
   .cards-grid {
-    max-width: 320px;
-    gap: 10px;
+    max-width: 410px;
+    gap: 8px;
   }
   .card-text-overlay {
     font-size: 15px;
@@ -216,8 +216,8 @@
     padding-bottom: 86px;
   }
   .cards-grid {
-    max-width: 294px;
-    gap: 10px;
+    max-width: 370px;
+    gap: 6px;
   }
   .card-text-overlay {
     font-size: 14px;
@@ -232,8 +232,8 @@
     padding-bottom: 82px;
   }
   .cards-grid {
-    max-width: 270px;
-    gap: 8px;
+    max-width: 344px;
+    gap: 6px;
   }
   .card-text-overlay {
     font-size: 13px;
