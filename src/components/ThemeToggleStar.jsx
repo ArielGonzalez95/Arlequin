@@ -145,7 +145,7 @@ function ThemeToggleStar({ isDarkMode, onToggle }) {
     };
   }, [isLoaded, isDarkMode]);
 
-  const tooltipText = isDarkMode ? 'Modo oscuro' : 'Modo claro';
+  const tooltipText = isDarkMode ? 'Modo claro' : 'Modo oscuro';
 
   return (
     <div className="theme-toggle-wrapper">

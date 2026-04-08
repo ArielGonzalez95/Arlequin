@@ -262,11 +262,29 @@ function LogoAnimation({
     const canvas = canvasRef.current;
     const ctx    = canvas.getContext('2d');
 
-    canvas.width        = Math.round(LOGO_SIZE * dpr);
-    canvas.height       = Math.round(LOGO_SIZE * dpr);
+    // Match canvas buffer to actual rendered pixel size to avoid upscaling blur.
+    // The container is CSS-scaled depending on viewport; canvas buffer must match
+    // the physical pixels it will actually occupy (displayedCSS × DPR).
+    const getContainerScale = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if (w <= 360) return 0.62;
+      if (w <= 390) return 0.68;
+      if (w <= 500) return 0.78;
+      if (w <= 768) return 0.88; // tablet portrait
+      if (h <= 580) return 0.68;
+      if (h <= 650) return 0.76;
+      if (h <= 780) return 0.86;
+      return 1.0;
+    };
+    const cssScale    = getContainerScale();
+    const effectiveDpr = cssScale * dpr; // physical pixels per LOGO_SIZE logical px
+
+    canvas.width        = Math.round(LOGO_SIZE * effectiveDpr);
+    canvas.height       = Math.round(LOGO_SIZE * effectiveDpr);
     canvas.style.width  = `${LOGO_SIZE}px`;
     canvas.style.height = `${LOGO_SIZE}px`;
-    ctx.scale(dpr, dpr);
+    ctx.scale(effectiveDpr, effectiveDpr);
 
     if (!isLoaded || showPlaceholder) {
       ctx.clearRect(0, 0, LOGO_SIZE, LOGO_SIZE);

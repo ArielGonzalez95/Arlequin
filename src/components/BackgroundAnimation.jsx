@@ -26,17 +26,17 @@ const STAR_POSITIONS_DESKTOP = [
   [28, 72], [72, 72],
 ];
 
-// Mobile: logo fills most of the width, so stars live in the top/bottom strips
-// and extreme corners — 11 total.
+// Mobile: avoid the button (top-left ~10% zone) and the logo (center circle).
+// Stars live in the top-right corner, side edges, and bottom strip — 10 total.
 const STAR_POSITIONS_MOBILE = [
-  // Top strip
-  [ 8,  6], [50,  5], [92,  6],
-  [15, 15],           [85, 15],
-  // Inner diagonals (above/below logo center)
-  [25, 26],           [75, 26],
+  // Top — right side only (button is top-left)
+  [65,  5], [90,  7],
+  // Side edges (clear of logo center)
+  [ 4, 38], [96, 32],
+  [ 4, 62], [96, 68],
   // Bottom strip
-  [ 5, 88], [95, 88],
-  [28, 95],           [72, 95],
+  [ 8, 90], [35, 94],
+  [65, 94], [92, 90],
 ];
 
 function BackgroundAnimation({ isDarkMode = true }) {
