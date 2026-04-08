@@ -538,6 +538,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
                   pointerEvents: formValido && !enviando && !enviado ? 'auto' : 'none',
                   cursor: formValido && !enviando && !enviado ? 'pointer' : 'default',
                 }}
+                onClick={formValido && !enviando && !enviado ? (e) => { e.stopPropagation(); handleBtnClick(); } : undefined}
               />
             )}
           </div>
