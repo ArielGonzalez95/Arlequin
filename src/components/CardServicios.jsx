@@ -351,8 +351,12 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
         } else {
           const frame0 = imagesRef.current[0];
           if (frame0) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frame0, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
-          setIsScalingDown(true);
-          setTimeout(() => onClose(), 400);
+          if (fromGrid) {
+            onClose();
+          } else {
+            setIsScalingDown(true);
+            setTimeout(() => onClose(), 400);
+          }
         }
       } else {
         animationRef.current = requestAnimationFrame(animate);

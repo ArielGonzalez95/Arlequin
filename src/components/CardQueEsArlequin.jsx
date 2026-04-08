@@ -342,14 +342,19 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
             goingToContactRef.current = false;
             if (onGoToContact) onGoToContact();
           } else {
-            // Show frame 00000 (card back), then scale down before returning to grid
+            // Show frame 00000 (card back)
             const frame0 = imagesRef.current[0];
             if (frame0) {
               ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
               ctx.drawImage(frame0, 0, 0, CARD_WIDTH, CARD_HEIGHT);
             }
-            setIsScalingDown(true);
-            setTimeout(() => onClose(), 400);
+            if (fromGrid) {
+              // GridStage handles the reverse animation — no CSS exit-scale needed
+              onClose();
+            } else {
+              setIsScalingDown(true);
+              setTimeout(() => onClose(), 400);
+            }
           }
         }
       } else {

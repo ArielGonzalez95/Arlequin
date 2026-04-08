@@ -272,8 +272,12 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
           if (animPhase === 'opening')  { setAnimPhase('fixedForm');    setShowContent(true); }
           if (animPhase === 'postSend') { setAnimPhase('fixedGracias'); setShowGracias(true); }
           if (animPhase === 'closing')  {
-            setIsScalingDown(true);
-            setTimeout(() => onClose(), 400);
+            if (fromGrid) {
+              onClose();
+            } else {
+              setIsScalingDown(true);
+              setTimeout(() => onClose(), 400);
+            }
           }
         }
       } else {

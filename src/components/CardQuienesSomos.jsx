@@ -327,14 +327,18 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
           closeFrameRef.current++;
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          // Show frame 00000 (card back), then scale down before returning to grid
+          // Show frame 00000 (card back)
           const frame0 = imagesRef.current[0];
           if (frame0) {
             ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
             ctx.drawImage(frame0, 0, 0, CARD_WIDTH, CARD_HEIGHT);
           }
-          setIsScalingDown(true);
-          setTimeout(() => onClose(), 400);
+          if (fromGrid) {
+            onClose();
+          } else {
+            setIsScalingDown(true);
+            setTimeout(() => onClose(), 400);
+          }
         }
       } else {
         animationRef.current = requestAnimationFrame(animate);

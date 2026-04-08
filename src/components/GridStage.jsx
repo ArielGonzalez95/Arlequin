@@ -15,7 +15,7 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
   const [selectedCard, setSelectedCard] = useState(null);
   // idle → stacking → expanding → complete
   const [clickPhase, setClickPhase] = useState('idle');
-  // stacked → dealing → idle
+  // stacked → dealing → idle  |  restoring → undealing → idle
   const [dealPhase, setDealPhase] = useState('stacked');
 
   // Translation + scale to move selected card to viewport center at component size
@@ -27,6 +27,10 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
   const gridRef = useRef(null);
   const dealTimerRef = useRef(null);
   const prevDealKeyRef = useRef(null); // null = not yet initialized
+
+  // Refs to store the last expand state for reverse (close) animation
+  const lastSelectedRef = useRef(null);
+  const lastExpandRef = useRef({ tx: 0, ty: 0, scale: 2 });
 
   // Load dorso image; mark cache so future mounts skip the async wait
   useEffect(() => {
@@ -43,9 +47,42 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
   }, [themeSuffix]);
 
   // Shared deal sequence: stacked → (2 RAFs) → dealing → (700ms) → idle
-  const runDeal = useCallback(() => {
+  // reverse=true: restoring → (2 RAFs) → undealing → (700ms) → idle
+  const runDeal = useCallback((reverse = false) => {
     if (dealTimerRef.current) clearTimeout(dealTimerRef.current);
     setClickPhase('idle');
+
+    if (reverse && lastSelectedRef.current !== null) {
+      // Snap cards to their "just before close" positions, then animate back to grid
+      const snapSelected = lastSelectedRef.current;
+      const snapExpand = { ...lastExpandRef.current };
+
+      setSelectedCard(snapSelected);
+      setExpandTransform(snapExpand);
+      setDealPhase('restoring');
+
+      let raf2;
+      const raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => {
+          setDealPhase('undealing');
+          dealTimerRef.current = setTimeout(() => {
+            dealTimerRef.current = null;
+            lastSelectedRef.current = null;
+            setSelectedCard(null);
+            setDealPhase('idle');
+            if (onDealComplete) onDealComplete();
+          }, 700);
+        });
+      });
+
+      return () => {
+        cancelAnimationFrame(raf1);
+        if (raf2) cancelAnimationFrame(raf2);
+        if (dealTimerRef.current) { clearTimeout(dealTimerRef.current); dealTimerRef.current = null; }
+      };
+    }
+
+    // Normal deal: stack all cards at grid center, then deal out
     setSelectedCard(null);
     setDealPhase('stacked');
 
@@ -71,7 +108,7 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
   // Initial deal animation on first load
   useEffect(() => {
     if (!isLoaded) return;
-    return runDeal();
+    return runDeal(false);
   }, [isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Re-deal when dealKey increments (returning from a card detail)
@@ -83,7 +120,7 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
     if (dealKey === prevDealKeyRef.current) return;
     prevDealKeyRef.current = dealKey;
     if (!isLoaded) return;
-    return runDeal();
+    return runDeal(true); // reverse: card flies back to slot, others fan out
   }, [dealKey, isLoaded, runDeal]);
 
   // Measure actual card positions ONLY when cards are in their natural grid positions
@@ -125,15 +162,21 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
       : 390;
     const scaleToComponent = targetWidth / rect.width;
 
+    const transform = {
+      tx: vpCenterX - cardCenterX,
+      ty: vpCenterY - cardCenterY,
+      scale: scaleToComponent,
+    };
+
+    // Store for reverse (close) animation
+    lastSelectedRef.current = index;
+    lastExpandRef.current = transform;
+
     if (onCardPreClick) onCardPreClick(index + 1);
     if (onExpandStart) onExpandStart();
 
     setSelectedCard(index);
-    setExpandTransform({
-      tx: vpCenterX - cardCenterX,
-      ty: vpCenterY - cardCenterY,
-      scale: scaleToComponent,
-    });
+    setExpandTransform(transform);
     setClickPhase('stacking');
 
     // After all cards stack, expand selected to center at component size
@@ -166,6 +209,53 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
         transform: 'translate(0px, 0px) scale(1)',
         transition: `transform 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${index * 120}ms`,
         zIndex: 4 - index,
+      };
+    }
+
+    // ── Reverse close animation ───────────────────────────────────
+    if ((dealPhase === 'restoring' || dealPhase === 'undealing') && selectedCard !== null) {
+      const isSelected = index === selectedCard;
+      const selCol = selectedCard % 2;
+      const selRow = Math.floor(selectedCard / 2);
+      const nonSelected = [0, 1, 2, 3].filter(i => i !== selectedCard);
+      const orderIndex = nonSelected.indexOf(index);
+
+      if (dealPhase === 'restoring') {
+        if (isSelected) {
+          // Snap selected card to viewport center (where it was when card detail opened)
+          const { tx, ty, scale } = expandTransform;
+          return {
+            transform: `translate(${tx}px, ${ty}px) scale(${scale})`,
+            zIndex: 15,
+            transition: 'none',
+          };
+        }
+        // Snap non-selected cards to stacked position behind selected (invisible)
+        const dx = (selCol - col) * colStep;
+        const dy = (selRow - row) * rowStep;
+        const deckOffset = (2 - orderIndex) * 3;
+        return {
+          transform: `translate(${dx + deckOffset}px, ${dy + deckOffset}px) scale(0.93)`,
+          zIndex: orderIndex + 1,
+          opacity: 0,
+          transition: 'none',
+        };
+      }
+
+      // dealPhase === 'undealing': animate everyone back to grid positions
+      if (isSelected) {
+        return {
+          transform: 'translate(0px, 0px) scale(1)',
+          zIndex: 10,
+          transition: 'transform 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        };
+      }
+      const delay = orderIndex * 120;
+      return {
+        transform: 'translate(0px, 0px) scale(1)',
+        zIndex: 4 - orderIndex,
+        opacity: 1,
+        transition: `transform 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, opacity 0.3s ease-out ${delay}ms`,
       };
     }
 
