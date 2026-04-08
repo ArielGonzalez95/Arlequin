@@ -172,9 +172,9 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
     const expandTargetWidth = window.innerWidth <= 500 ? window.innerWidth * 0.85 : 390;
     const scaleToComponent = expandTargetWidth / rect.width;
 
-    // Scale for the RESTORING snap: smaller than the card component (280px desktop)
-    // so the dorso appears as a proper card at center, not filling the screen
-    const restoreTargetWidth = window.innerWidth <= 500 ? window.innerWidth * 0.6 : 280;
+    // Scale for the RESTORING snap: same as the expand animation (390px desktop / 85vw mobile)
+    // matches what the grid shows when opening a card, so no size jump on close
+    const restoreTargetWidth = window.innerWidth <= 500 ? window.innerWidth * 0.85 : 390;
     const restoreScale = restoreTargetWidth / rect.width;
 
     const expandTransformVal = { tx, ty, scale: scaleToComponent };
