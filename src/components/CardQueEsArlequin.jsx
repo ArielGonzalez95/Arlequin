@@ -354,8 +354,8 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
               ctx.drawImage(frame0, 0, 0, CARD_WIDTH, CARD_HEIGHT);
             }
             if (fromGrid) {
-              // Wait one frame so the browser paints the dorso before GridStage takes over
-              requestAnimationFrame(() => onClose());
+              // Hold dorso visible at center before GridStage takes over (~3s total close sequence)
+              setTimeout(() => onClose(), 700);
             } else {
               setIsScalingDown(true);
               setTimeout(() => onClose(), 400);

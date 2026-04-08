@@ -75,7 +75,7 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
             setSelectedCard(null);
             setDealPhase('idle');
             if (onDealComplete) onDealComplete();
-          }, 820);
+          }, 1600);
         });
       });
 
@@ -256,15 +256,15 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
         return {
           transform: 'translate(0px, 0px) scale(1)',
           zIndex: 10,
-          transition: 'transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          transition: 'transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         };
       }
-      const delay = orderIndex * 150;
+      const delay = 200 + orderIndex * 220;
       return {
         transform: 'translate(0px, 0px) scale(1)',
         zIndex: 4 - orderIndex,
         opacity: 1,
-        transition: `transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, opacity 0.35s ease-out ${delay}ms`,
+        transition: `transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, opacity 0.5s ease-out ${delay}ms`,
       };
     }
 
