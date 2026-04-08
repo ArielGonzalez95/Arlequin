@@ -161,10 +161,11 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
 
   const handleClose = () => {
     if (isClosing || isHidingUI) return;
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
     setIsHidingUI(true);
+    setShowNavIcons(false);
     if (onCloseStart) onCloseStart();
     setTimeout(() => {
-      setShowNavIcons(false);
       setIsClosing(true);
     }, 350);
   };
@@ -291,7 +292,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
           ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
           ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
         }
-        setShowNavIcons(true);
+        if (!isClosing) setShowNavIcons(true);
         return;
       }
       const frame = imagesRef.current[currentFrameRef.current];
@@ -330,6 +331,8 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
     const ctx = canvas.getContext('2d');
     closeFrameRef.current = 0;
     lastCloseFrameTimeRef.current = 0;
+    canvas.style.transition = '';
+    canvas.style.transform = '';
     const frames = closeImagesRef.current;
 
     const animate = (timestamp) => {
@@ -351,14 +354,10 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
             goingToContactRef.current = false;
             if (onGoToContact) onGoToContact();
           } else {
-            // Show frame 00000 (card back)
-            const frame0 = imagesRef.current[0];
-            if (frame0) {
-              ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-              ctx.drawImage(frame0, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-            }
+            // Last frame is 00000 — scale down instantly then hand off to grid
+            const _tw = window.innerWidth <= 500 ? window.innerWidth * 0.85 : 390; const _sx = (_tw / CARD_WIDTH).toFixed(4); const _sy = ((_tw * 4 / 3) / CARD_HEIGHT).toFixed(4); canvas.style.transform = `scaleX(${_sx}) scaleY(${_sy})`;
             if (fromGrid) {
-              onClose();
+              setTimeout(() => onClose(), 150);
             } else {
               setIsScalingDown(true);
               setTimeout(() => onClose(), 400);

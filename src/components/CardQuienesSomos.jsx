@@ -79,8 +79,24 @@ const _closeCache = {};
 
 // 4 pages: 0-1 photos, 2-3 text
 const PAGES = [
-  { type: 'image', src: '/Cartas/arlequin_quienes_somos_lucas_web.avif', alt: 'Lucas' },
-  { type: 'image', src: '/Cartas/arlequin_quienes_somos_ariel.avif', alt: 'Ariel' },
+  {
+    type: 'image',
+    src: '/Cartas/arlequin_quienes_somos_lucas_web.avif',
+    alt: 'Lucas',
+    name: 'LUCAS REMENTERIA',
+    role: 'Creativo y analítico',
+    title: 'El diseñador',
+    emoji: '🧠',
+  },
+  {
+    type: 'image',
+    src: '/Cartas/arlequin_quienes_somos_ariel.avif',
+    alt: 'Ariel',
+    name: 'Ariel González',
+    role: 'Lógico y preciso',
+    title: 'El programador',
+    emoji: '🫀',
+  },
   {
     type: 'text',
     lines: [
@@ -150,10 +166,11 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
 
   const handleClose = () => {
     if (isClosing || isHidingUI) return;
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
     setIsHidingUI(true);
+    setShowContent(false);
     if (onCloseStart) onCloseStart();
     setTimeout(() => {
-      setShowContent(false);
       setIsClosing(true);
     }, 350);
   };
@@ -280,7 +297,7 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
           ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
           ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
         }
-        setShowContent(true);
+        if (!isClosing) setShowContent(true);
         return;
       }
       const frame = imagesRef.current[currentFrameRef.current];
@@ -319,6 +336,8 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
     const ctx = canvas.getContext('2d');
     closeFrameRef.current = 0;
     lastCloseFrameTimeRef.current = 0;
+    canvas.style.transition = '';
+    canvas.style.transform = '';
     const frames = closeImagesRef.current;
 
     const animate = (timestamp) => {
@@ -336,14 +355,9 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
           closeFrameRef.current++;
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          // Show frame 00000 (card back)
-          const frame0 = imagesRef.current[0];
-          if (frame0) {
-            ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-            ctx.drawImage(frame0, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-          }
+          const _tw = window.innerWidth <= 500 ? window.innerWidth * 0.85 : 390; const _sx = (_tw / CARD_WIDTH).toFixed(4); const _sy = ((_tw * 4 / 3) / CARD_HEIGHT).toFixed(4); canvas.style.transform = `scaleX(${_sx}) scaleY(${_sy})`;
           if (fromGrid) {
-            onClose();
+            setTimeout(() => onClose(), 150);
           } else {
             setIsScalingDown(true);
             setTimeout(() => onClose(), 400);
@@ -374,7 +388,7 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
       <canvas
         ref={canvasRef}
         className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}`}
-        style={!isScalingDown && fromGrid ? { animation: 'none' } : undefined}
+        style={{ ...(!isScalingDown && fromGrid ? { animation: 'none' } : {}), position: 'relative', zIndex: 1 }}
       />
 
       {showContent && (
@@ -388,11 +402,29 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
 
           {/* Page content */}
           {currentPage.type === 'image' ? (
-            <img
-              src={currentPage.src}
-              alt={currentPage.alt}
-              className="quienes-somos-photo"
-            />
+            <>
+              <div className="quienes-somos-photo-wrapper">
+                <img
+                  src={currentPage.src}
+                  alt={currentPage.alt}
+                  className="quienes-somos-photo"
+                />
+              </div>
+              <div
+                className="quienes-somos-caption"
+                style={currentPageIndex === 1 ? { top: '395px' } : undefined}
+              >
+                <p
+                  className="quienes-somos-name"
+                  style={currentPageIndex === 1 ? { fontSize: '27px' } : undefined}
+                >
+                  {currentPage.name}
+                </p>
+                <p className="quienes-somos-role">{currentPage.role}</p>
+                <p className="quienes-somos-title">{currentPage.title}</p>
+                {currentPage.emoji && <p className="quienes-somos-emoji">{currentPage.emoji}</p>}
+              </div>
+            </>
           ) : (
             <div className="card-text-container">
               {/* Always white text since card background is always dark */}

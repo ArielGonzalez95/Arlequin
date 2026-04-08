@@ -105,10 +105,10 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
   const handleClose = () => {
     if (animPhase === 'closing' || isHidingUI) return;
     setIsHidingUI(true);
+    setShowContent(false);
+    setShowGracias(false);
     if (onCloseStart) onCloseStart();
     setTimeout(() => {
-      setShowContent(false);
-      setShowGracias(false);
       setAnimPhase('closing');
     }, 350);
   };
@@ -257,6 +257,8 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
 
     frameIdxRef.current = 0;
     lastTimeRef.current = 0;
+    canvas.style.transition = '';
+    canvas.style.transform = '';
 
     // Draw first frame immediately
     if (frames[0]) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frames[0], 0, 0, CARD_WIDTH, CARD_HEIGHT); }
@@ -269,7 +271,10 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
         lastTimeRef.current += CARD_FRAME_DURATION;
         const idx = frameIdxRef.current;
         const img = frames[idx];
-        if (img) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(img, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+        if (img) {
+          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+          ctx.drawImage(img, 0, 0, CARD_WIDTH, CARD_HEIGHT);
+        }
 
         if (idx < frames.length - 1) {
           frameIdxRef.current++;
@@ -279,8 +284,9 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
           if (animPhase === 'opening')  { setAnimPhase('fixedForm');    setShowContent(true); }
           if (animPhase === 'postSend') { setAnimPhase('fixedGracias'); setShowGracias(true); }
           if (animPhase === 'closing')  {
+            const _tw = window.innerWidth <= 500 ? window.innerWidth * 0.85 : 390; const _sx = (_tw / CARD_WIDTH).toFixed(4); const _sy = ((_tw * 4 / 3) / CARD_HEIGHT).toFixed(4); canvas.style.transform = `scaleX(${_sx}) scaleY(${_sy})`;
             if (fromGrid) {
-              onClose();
+              setTimeout(() => onClose(), 150);
             } else {
               setIsScalingDown(true);
               setTimeout(() => onClose(), 400);

@@ -1,11 +1,66 @@
-/* Photo overlay for QuienesSomos pages 1 & 2 */
-.quienes-somos-photo {
+/* Photo wrapper — absolutely positioned over the card canvas */
+.quienes-somos-photo-wrapper {
   position: absolute;
-  top: 195px;
-  left: 95px;
+  top: 165px;
+  left: 50%;
+  transform: translateX(-50%);
   width: 240px;
   height: 330px;
-  object-fit: cover;
   z-index: 5;
   border-radius: 2px;
+  overflow: hidden;
+}
+
+/* Photo fills the wrapper */
+.quienes-somos-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Caption sits below the photo, freely positionable */
+.quienes-somos-caption {
+  position: absolute;
+  top: 370px;
+  left: 50%;
+  transform: translateX(-50%) translateZ(0);
+  width: 240px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  will-change: transform;
+}
+
+.quienes-somos-name {
+  font-family: 'NewRocker-Regular', serif;
+  font-size: 22px;
+  letter-spacing: 1.5px;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.quienes-somos-role {
+  font-family: 'NewRocker-Regular', serif;
+  font-size: 22px;
+  color: #ffffff;
+  margin: 0 0 2px 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.quienes-somos-title {
+  font-family: 'NewRocker-Regular', serif;
+  font-size: 22px;
+  color: #ffffff;
+  margin: 0 0 5px 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.quienes-somos-emoji {
+  font-size: 24px;
+  margin: 0;
+  line-height: 1;
 }

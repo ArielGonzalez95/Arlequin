@@ -190,10 +190,11 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
   };
   const handleClose = () => {
     if (isClosing || isHidingUI) return;
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
     setIsHidingUI(true);
+    setShowNavIcons(false);
     if (onCloseStart) onCloseStart();
     setTimeout(() => {
-      setShowNavIcons(false);
       setIsClosing(true);
     }, 350);
   };
@@ -310,7 +311,7 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
       if (isCompleteRef.current) {
         const final = imagesRef.current[totalFrames];
         if (final) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(final, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
-        setShowNavIcons(true);
+        if (!isClosing) setShowNavIcons(true);
         return;
       }
       const frame = imagesRef.current[currentFrameRef.current];
@@ -345,6 +346,8 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
     const ctx    = canvas.getContext('2d');
     closeFrameRef.current      = 0;
     lastCloseFrameTimeRef.current = 0;
+    canvas.style.transition = '';
+    canvas.style.transform = '';
     const frames = closeImagesRef.current;
 
     const animate = (timestamp) => {
@@ -353,16 +356,18 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
       }
       if (timestamp - lastCloseFrameTimeRef.current >= CARD_FRAME_DURATION) {
         const frame = frames[closeFrameRef.current];
-        if (frame) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+        if (frame) {
+          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+          ctx.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
+        }
         lastCloseFrameTimeRef.current += CARD_FRAME_DURATION;
         if (closeFrameRef.current < frames.length - 1) {
           closeFrameRef.current++;
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          const frame0 = imagesRef.current[0];
-          if (frame0) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frame0, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+          const _tw = window.innerWidth <= 500 ? window.innerWidth * 0.85 : 390; const _sx = (_tw / CARD_WIDTH).toFixed(4); const _sy = ((_tw * 4 / 3) / CARD_HEIGHT).toFixed(4); canvas.style.transform = `scaleX(${_sx}) scaleY(${_sy})`;
           if (fromGrid) {
-            onClose();
+            setTimeout(() => onClose(), 150);
           } else {
             setIsScalingDown(true);
             setTimeout(() => onClose(), 400);
