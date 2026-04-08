@@ -347,11 +347,34 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
       active = true;
 
       const rect = canvas.getBoundingClientRect();
+      const scaleX0 = canvas.width  / rect.width;
+      const scaleY0 = canvas.height / rect.height;
       console.log('%c── DEBUG BOTÓN ENVIAR ──', 'font-weight:bold;color:#f0a500');
       console.log(`Canvas interno:  ${canvas.width} × ${canvas.height} px`);
       console.log(`Display CSS:     ${canvas.style.width} × ${canvas.style.height}`);
       console.log(`Rect viewport:   left=${rect.left.toFixed(0)} top=${rect.top.toFixed(0)} w=${rect.width.toFixed(0)} h=${rect.height.toFixed(0)}`);
-      console.log('Mové el mouse sobre el botón. Las coordenadas aparecen en el overlay y en consola.');
+
+      // Escanear bounding box de píxeles no-transparentes (α > 10)
+      console.log('%cEscaneando bounding box...', 'color:#aaa');
+      const ctx0 = canvas.getContext('2d');
+      const imgData = ctx0.getImageData(0, 0, canvas.width, canvas.height).data;
+      let minPX = canvas.width, maxPX = 0, minPY = canvas.height, maxPY = 0;
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          if (imgData[(y * canvas.width + x) * 4 + 3] > 10) {
+            if (x < minPX) minPX = x;
+            if (x > maxPX) maxPX = x;
+            if (y < minPY) minPY = y;
+            if (y > maxPY) maxPY = y;
+          }
+        }
+      }
+      const bbCSSx0 = (minPX / scaleX0).toFixed(0), bbCSSx1 = (maxPX / scaleX0).toFixed(0);
+      const bbCSSy0 = (minPY / scaleY0).toFixed(0), bbCSSy1 = (maxPY / scaleY0).toFixed(0);
+      const bbW = (+bbCSSx1 - +bbCSSx0), bbH = (+bbCSSy1 - +bbCSSy0);
+      console.log(`%cBounding box PX:  x ${minPX}–${maxPX}, y ${minPY}–${maxPY}`, 'color:#f0a500;font-weight:bold');
+      console.log(`%cBounding box CSS: x ${bbCSSx0}–${bbCSSx1} (w=${bbW}), y ${bbCSSy0}–${bbCSSy1} (h=${bbH})`, 'color:#f0a500;font-weight:bold');
+      console.log('Mové el mouse sobre el botón. Las coordenadas aparecen en el overlay.');
 
       // Overlay flotante
       overlay = document.createElement('div');
