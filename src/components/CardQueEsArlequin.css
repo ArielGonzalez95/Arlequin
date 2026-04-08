@@ -65,8 +65,8 @@
 /* Canvas for card animation */
 .card-canvas {
   display: block;
-  width: 450px !important;
-  height: 680px !important;
+  width: 390px !important;
+  height: 590px !important;
   animation: card-enter-scale 0.6s ease-out forwards;
   will-change: transform;
   image-rendering: auto;
@@ -296,8 +296,8 @@
 /* Large mobile / small tablet (≤ 500px) */
 @media (max-width: 500px) {
   .card-canvas {
-    width: 450px !important;
-    height: 680px !important;
+    width: 390px !important;
+    height: 590px !important;
   }
   .card-que-es-arlequin {
     transform: scale(0.90);

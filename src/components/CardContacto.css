@@ -117,8 +117,8 @@ textarea.contacto-field {
 /* ── Card container override: fix dimensions so absolute children
    stay inside the 450×680 canvas area ──────────────────────────── */
 .card-contacto-outer {
-  width: 450px;
-  height: 680px;
+  width: 390px;
+  height: 590px;
   overflow: visible;
 }
 

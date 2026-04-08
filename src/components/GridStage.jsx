@@ -87,7 +87,7 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
     // On mobile use 85% of viewport width to avoid overflowing the screen
     const targetWidth = window.innerWidth <= 500
       ? window.innerWidth * 0.85
-      : 450;
+      : 390;
     const scaleToComponent = targetWidth / rect.width;
 
     if (onCardPreClick) onCardPreClick(index + 1);
