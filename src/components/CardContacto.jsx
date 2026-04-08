@@ -329,6 +329,80 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     return () => { delete window.__testEnvio; };
   }, [animPhase]);
 
+  // ── Console helper para debug de posición del botón enviar ───────────────────
+  useEffect(() => {
+    let active = false;
+    let overlay = null;
+    let cleanup = null;
+
+    window.__debugBtn = () => {
+      const canvas = btnCanvasRef.current;
+      if (!canvas) { console.warn('__debugBtn: canvas del botón no encontrado (abrí el formulario primero)'); return; }
+
+      if (active) {
+        if (cleanup) cleanup();
+        console.log('__debugBtn: desactivado');
+        return;
+      }
+      active = true;
+
+      const rect = canvas.getBoundingClientRect();
+      console.log('%c── DEBUG BOTÓN ENVIAR ──', 'font-weight:bold;color:#f0a500');
+      console.log(`Canvas interno:  ${canvas.width} × ${canvas.height} px`);
+      console.log(`Display CSS:     ${canvas.style.width} × ${canvas.style.height}`);
+      console.log(`Rect viewport:   left=${rect.left.toFixed(0)} top=${rect.top.toFixed(0)} w=${rect.width.toFixed(0)} h=${rect.height.toFixed(0)}`);
+      console.log('Mové el mouse sobre el botón. Las coordenadas aparecen en el overlay y en consola.');
+
+      // Overlay flotante
+      overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position:fixed; pointer-events:none; z-index:99999;
+        background:rgba(0,0,0,0.75); color:#fff; font:12px monospace;
+        padding:4px 8px; border-radius:4px; white-space:pre; display:none;
+      `;
+      document.body.appendChild(overlay);
+
+      // Resaltar canvas con borde
+      canvas.style.outline = '2px solid #f0a500';
+
+      const onMove = (e) => {
+        const r = canvas.getBoundingClientRect();
+        const cssX = e.clientX - r.left;
+        const cssY = e.clientY - r.top;
+        const scaleX = canvas.width  / r.width;
+        const scaleY = canvas.height / r.height;
+        const pxX = Math.round(cssX * scaleX);
+        const pxY = Math.round(cssY * scaleY);
+        const alpha = (cssX >= 0 && cssY >= 0 && cssX <= r.width && cssY <= r.height)
+          ? canvas.getContext('2d').getImageData(pxX, pxY, 1, 1).data[3]
+          : '-';
+
+        overlay.style.display = 'block';
+        overlay.style.left = (e.clientX + 14) + 'px';
+        overlay.style.top  = (e.clientY - 10) + 'px';
+        overlay.textContent =
+          `CSS  (${cssX.toFixed(0)}, ${cssY.toFixed(0)})\n` +
+          `PX   (${pxX}, ${pxY})\n` +
+          `α    ${alpha}`;
+      };
+
+      window.addEventListener('mousemove', onMove);
+
+      cleanup = () => {
+        active = false;
+        window.removeEventListener('mousemove', onMove);
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        overlay = null;
+        if (canvas) canvas.style.outline = '';
+      };
+    };
+
+    return () => {
+      delete window.__debugBtn;
+      if (cleanup) cleanup();
+    };
+  }, []);
+
   // ── Preload button frames ────────────────────────────────────────────────────
   useEffect(() => {
     if (preload) return; // skip heavy button preload — loads on actual open
