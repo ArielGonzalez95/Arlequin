@@ -284,9 +284,16 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
           if (animPhase === 'opening')  { setAnimPhase('fixedForm');    setShowContent(true); }
           if (animPhase === 'postSend') { setAnimPhase('fixedGracias'); setShowGracias(true); }
           if (animPhase === 'closing')  {
-            const _tw = window.innerWidth <= 500 ? window.innerWidth * 0.85 : 390; const _sx = (_tw / CARD_WIDTH).toFixed(4); const _sy = ((_tw * 4 / 3) / CARD_HEIGHT).toFixed(4); canvas.style.transform = `scaleX(${_sx}) scaleY(${_sy})`;
+            // Smooth shrink to grid card size, then hand off
+            const _tw = window.innerWidth <= 500 ? window.innerWidth * 0.85 : 390;
             if (fromGrid) {
-              setTimeout(() => onClose(), 150);
+              const _th = _tw * 4 / 3;
+              const rendered = canvasRef.current.getBoundingClientRect();
+              const _sx = (_tw / rendered.width).toFixed(4);
+              const _sy = (_th / rendered.height).toFixed(4);
+              canvas.style.transition = 'transform 0.55s ease-in-out';
+              canvas.style.transform = `scaleX(${_sx}) scaleY(${_sy})`;
+              setTimeout(() => onClose(), 650);
             } else {
               setIsScalingDown(true);
               setTimeout(() => onClose(), 400);
