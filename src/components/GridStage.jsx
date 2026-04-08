@@ -1,10 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import './GridStage.css';
 
 const CARD_LABELS = ['¿Qué es Arlequín?', '¿Quiénes somos?', 'Servicios', 'Contacto'];
 
-function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete, isDarkMode }) {
-  const [isLoaded, setIsLoaded] = useState(false);
+// Module-level cache: true once dorso image has been loaded per theme.
+// Allows synchronous isLoaded=true on re-mount (no flash).
+const _dorsoCached = {};
+
+function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete, isDarkMode, dealKey = 0 }) {
+  const themeSuffix = isDarkMode ? 'dark' : 'clear';
+
+  // Synchronous init: if already cached, skip loading state entirely
+  const [isLoaded, setIsLoaded] = useState(() => !!_dorsoCached[themeSuffix]);
   const [selectedCard, setSelectedCard] = useState(null);
   // idle → stacking → expanding → complete
   const [clickPhase, setClickPhase] = useState('idle');
@@ -19,14 +26,65 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
   const [rowStep, setRowStep] = useState(304);
   const gridRef = useRef(null);
   const dealTimerRef = useRef(null);
+  const prevDealKeyRef = useRef(null); // null = not yet initialized
 
-  const themeSuffix = isDarkMode ? 'dark' : 'clear';
-
+  // Load dorso image; mark cache so future mounts skip the async wait
   useEffect(() => {
+    if (_dorsoCached[themeSuffix]) {
+      setIsLoaded(true);
+      return;
+    }
     const img = new Image();
-    img.onload = () => setIsLoaded(true);
+    img.onload = () => {
+      _dorsoCached[themeSuffix] = true;
+      setIsLoaded(true);
+    };
     img.src = `/Cartas/00000_arlequin_dorso_${themeSuffix}.avif`;
   }, [themeSuffix]);
+
+  // Shared deal sequence: stacked → (2 RAFs) → dealing → (700ms) → idle
+  const runDeal = useCallback(() => {
+    if (dealTimerRef.current) clearTimeout(dealTimerRef.current);
+    setClickPhase('idle');
+    setSelectedCard(null);
+    setDealPhase('stacked');
+
+    let raf2;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        setDealPhase('dealing');
+        dealTimerRef.current = setTimeout(() => {
+          dealTimerRef.current = null;
+          setDealPhase('idle');
+          if (onDealComplete) onDealComplete();
+        }, 700);
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+      if (dealTimerRef.current) { clearTimeout(dealTimerRef.current); dealTimerRef.current = null; }
+    };
+  }, [onDealComplete]);
+
+  // Initial deal animation on first load
+  useEffect(() => {
+    if (!isLoaded) return;
+    return runDeal();
+  }, [isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-deal when dealKey increments (returning from a card detail)
+  useEffect(() => {
+    if (prevDealKeyRef.current === null) {
+      prevDealKeyRef.current = dealKey; // initialise without running
+      return;
+    }
+    if (dealKey === prevDealKeyRef.current) return;
+    prevDealKeyRef.current = dealKey;
+    if (!isLoaded) return;
+    return runDeal();
+  }, [dealKey, isLoaded, runDeal]);
 
   // Measure actual card positions ONLY when cards are in their natural grid positions
   // (dealPhase === 'idle'). Measuring while stacked gives colStep ≈ 0 and breaks animations.
@@ -47,29 +105,6 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
   }, [dealPhase]);
-
-  // Entry deal animation on mount
-  useEffect(() => {
-    if (!isLoaded) return;
-
-    setDealPhase('stacked');
-
-    const raf1 = requestAnimationFrame(() => {
-      const raf2 = requestAnimationFrame(() => {
-        setDealPhase('dealing');
-        dealTimerRef.current = setTimeout(() => {
-          setDealPhase('idle');
-          if (onDealComplete) onDealComplete();
-        }, 700);
-      });
-      return () => cancelAnimationFrame(raf2);
-    });
-
-    return () => {
-      cancelAnimationFrame(raf1);
-      if (dealTimerRef.current) clearTimeout(dealTimerRef.current);
-    };
-  }, [isLoaded]);
 
   const handleCardClick = (index) => {
     if (clickPhase !== 'idle' || dealPhase !== 'idle') return;

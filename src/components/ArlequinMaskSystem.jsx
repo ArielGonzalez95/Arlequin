@@ -41,6 +41,7 @@ function ArlequinMaskSystem({
   const [isShrinkingOut, setIsShrinkingOut] = useState(false);
   const [preloadCard, setPreloadCard] = useState(null);
   const [isCardExpanding, setIsCardExpanding] = useState(false);
+  const [dealKey, setDealKey] = useState(0);
   // Use ref for tracking "NO" flow - more reliable than state
   const pendingCardStageRef = useRef(false);
 
@@ -146,6 +147,7 @@ function ArlequinMaskSystem({
   const handleCardDetailClose = useCallback(() => {
     setSelectedCard(null);
     setCardFromGrid(false);
+    setDealKey(k => k + 1);
     setStage(STAGES.GRID);
   }, []);
 
@@ -169,18 +171,8 @@ function ArlequinMaskSystem({
         );
       case STAGES.CARD:
         return (
-          <CardStage 
+          <CardStage
             onClose={handleCardClose}
-            isDarkMode={isDarkMode}
-          />
-        );
-      case STAGES.GRID:
-        return (
-          <GridStage
-            onCardClick={handleGridCardClick}
-            onCardPreClick={handleGridCardPreClick}
-            onExpandStart={handleCardExpandStart}
-            onDealComplete={handleDealComplete}
             isDarkMode={isDarkMode}
           />
         );
@@ -228,6 +220,19 @@ function ArlequinMaskSystem({
 
       {stage !== STAGES.MASK_SHOWING && stage !== STAGES.NONE && (
         <div className={`mask-content${isShrinkingOut ? ' shrinking-out' : ''}`}>
+          {/* GridStage stays mounted during CARD_DETAIL so re-deal fires without flash */}
+          {(stage === STAGES.GRID || stage === STAGES.CARD_DETAIL) && (
+            <div style={stage !== STAGES.GRID ? { display: 'none' } : undefined}>
+              <GridStage
+                onCardClick={handleGridCardClick}
+                onCardPreClick={handleGridCardPreClick}
+                onExpandStart={handleCardExpandStart}
+                onDealComplete={handleDealComplete}
+                isDarkMode={isDarkMode}
+                dealKey={dealKey}
+              />
+            </div>
+          )}
           {renderStageContent()}
         </div>
       )}
