@@ -1,0 +1,26 @@
+.deal-animation-stage {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* Suppress hover scale on deal cards */
+.deal-animation-stage .grid-card:hover {
+  transform: none;
+}
+
+@keyframes deal-fly-out {
+  0% {
+    transform: translateX(var(--deal-dx)) translateY(var(--deal-dy)) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  35% {
+    transform: translateX(calc(var(--deal-dx) * 0.35))
+               translateY(calc(var(--deal-dy) * 0.35))
+               scale(1)
+               rotate(var(--deal-rot));
+  }
+  100% {
+    transform: translateX(0px) translateY(0px) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}

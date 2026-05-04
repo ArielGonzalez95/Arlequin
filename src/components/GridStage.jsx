@@ -5,7 +5,8 @@ const CARD_LABELS = ['¿Qué es Arlequín?', '¿Quiénes somos?', 'Servicios', '
 
 // Module-level cache: true once dorso image has been loaded per theme.
 // Allows synchronous isLoaded=true on re-mount (no flash).
-const _dorsoCached = {};
+// Exported so CardDealAnimation can mark it before GridStage first mounts.
+export const _dorsoCached = {};
 
 function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete, isDarkMode, dealKey = 0 }) {
   const themeSuffix = isDarkMode ? 'dark' : 'clear';
@@ -15,8 +16,8 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
   const [selectedCard, setSelectedCard] = useState(null);
   // idle → stacking → expanding → complete
   const [clickPhase, setClickPhase] = useState('idle');
-  // stacked → dealing → idle  |  restoring → undealing → idle
-  const [dealPhase, setDealPhase] = useState('stacked');
+  // restoring → undealing → idle  (entry animation removed — CardDealAnimation handles it)
+  const [dealPhase, setDealPhase] = useState('idle');
 
   // Translation + scale to move selected card to viewport center
   const [expandTransform, setExpandTransform] = useState({ tx: 0, ty: 0, scale: 2 });
@@ -112,12 +113,6 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
       if (dealTimerRef.current) { clearTimeout(dealTimerRef.current); dealTimerRef.current = null; }
     };
   }, [onDealComplete]);
-
-  // Initial deal animation on first load
-  useEffect(() => {
-    if (!isLoaded) return;
-    return runDeal(false);
-  }, [isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Re-deal when dealKey increments (returning from a card detail).
   // useLayoutEffect: fires synchronously before the browser paints, so the

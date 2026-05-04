@@ -4,6 +4,7 @@ import ArlequinEscudo from './ArlequinEscudo';
 import QuestionStage from './QuestionStage';
 import CardStage from './CardStage';
 import GridStage from './GridStage';
+import CardDealAnimation from './CardDealAnimation';
 import CardQueEsArlequin from './CardQueEsArlequin';
 import CardQuienesSomos from './CardQuienesSomos';
 import CardServicios from './CardServicios';
@@ -16,6 +17,7 @@ const STAGES = {
   MASK_SHOWING: 'mask_showing',
   QUESTION: 'question',
   CARD: 'card',
+  DEALING: 'dealing',   // CardDealAnimation phase before grid is stable
   GRID: 'grid',
   CARD_DETAIL: 'card_detail'
 };
@@ -61,7 +63,7 @@ function ArlequinMaskSystem({
       // Only show QUESTION if we're coming from a fresh start (NONE)
       if (stage === STAGES.NONE) {
         const hasAnswered = localStorage.getItem('arlequin_answered');
-        setStage(hasAnswered ? STAGES.GRID : STAGES.QUESTION);
+        setStage(hasAnswered ? STAGES.DEALING : STAGES.QUESTION);
       }
       return;
     }
@@ -87,9 +89,14 @@ function ArlequinMaskSystem({
     }
   }, [phase, stage]);
 
-  // Handle YES click - go to grid
+  // Handle YES click - trigger deal animation before grid
   const handleYes = useCallback(() => {
     localStorage.setItem('arlequin_answered', '1');
+    setStage(STAGES.DEALING);
+  }, []);
+
+  // Called by CardDealAnimation when Phase B finishes
+  const handleDealAnimationComplete = useCallback(() => {
     setStage(STAGES.GRID);
   }, []);
 
@@ -161,10 +168,17 @@ function ArlequinMaskSystem({
   // Render current stage content
   const renderStageContent = () => {
     switch (stage) {
+      case STAGES.DEALING:
+        return (
+          <CardDealAnimation
+            isDarkMode={isDarkMode}
+            onDealComplete={handleDealAnimationComplete}
+          />
+        );
       case STAGES.QUESTION:
         return (
-          <QuestionStage 
-            onYes={handleYes} 
+          <QuestionStage
+            onYes={handleYes}
             onNo={handleNo}
             isDarkMode={isDarkMode}
           />
