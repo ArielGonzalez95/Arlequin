@@ -263,12 +263,19 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     // Draw first frame immediately
     if (frames[0]) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frames[0], 0, 0, CARD_WIDTH, CARD_HEIGHT); }
 
+    const handleVisibility = () => {
+      if (!document.hidden) lastTimeRef.current = 0;
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     const animate = (timestamp) => {
       if (lastTimeRef.current === 0) {
-        lastTimeRef.current = timestamp - CARD_FRAME_DURATION;
+        lastTimeRef.current = timestamp;
+        animRAFRef.current = requestAnimationFrame(animate);
+        return;
       }
       if (timestamp - lastTimeRef.current >= CARD_FRAME_DURATION) {
-        lastTimeRef.current += CARD_FRAME_DURATION;
+        lastTimeRef.current = timestamp;
         const idx = frameIdxRef.current;
         const img = frames[idx];
         if (img) {
@@ -301,7 +308,10 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     };
 
     animRAFRef.current = requestAnimationFrame(animate);
-    return () => { if (animRAFRef.current) cancelAnimationFrame(animRAFRef.current); };
+    return () => {
+      if (animRAFRef.current) cancelAnimationFrame(animRAFRef.current);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [animPhase]);
 
   // ── Trigger postSend when button animation completes ─────────────────────────

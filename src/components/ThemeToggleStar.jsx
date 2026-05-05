@@ -96,11 +96,16 @@ function ThemeToggleStar({ isDarkMode, onToggle, isLowEnd = false }) {
 
     if (isLowEnd) return;
 
+    const handleVisibility = () => {
+      if (!document.hidden) lastFrameTimeRef.current = 0;
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     const animate = (timestamp) => {
       if (lastFrameTimeRef.current === 0) lastFrameTimeRef.current = timestamp;
       if (timestamp - lastFrameTimeRef.current >= FRAME_DURATION) {
         currentFrameRef.current = (currentFrameRef.current + 1) % TOTAL_FRAMES;
-        lastFrameTimeRef.current += FRAME_DURATION; // fixed timestep — no drift
+        lastFrameTimeRef.current = timestamp;
         drawFrame();
       }
       animationRef.current = requestAnimationFrame(animate);
@@ -109,6 +114,7 @@ function ThemeToggleStar({ isDarkMode, onToggle, isLowEnd = false }) {
     animationRef.current = requestAnimationFrame(animate);
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [isLoaded, isDarkMode, isLowEnd]);
 

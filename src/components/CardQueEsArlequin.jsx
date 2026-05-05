@@ -280,21 +280,44 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
 
     drawFrame();
 
+    const handleVisibility = () => {
+      if (!document.hidden) lastFrameTimeRef.current = 0;
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     const animate = (timestamp) => {
-      if (timestamp - lastFrameTimeRef.current >= CARD_FRAME_DURATION) {
-        if (currentFrameRef.current < totalFrames - 1) {
-          currentFrameRef.current++;
-        } else {
-          isCompleteRef.current = true;
-        }
-        lastFrameTimeRef.current += CARD_FRAME_DURATION;
-        drawFrame();
+      if (lastFrameTimeRef.current === 0) {
+        lastFrameTimeRef.current = timestamp;
+        animationRef.current = requestAnimationFrame(animate);
+        return;
       }
+
+      const elapsed = timestamp - lastFrameTimeRef.current;
+
+      if (elapsed >= CARD_FRAME_DURATION) {
+        lastFrameTimeRef.current = timestamp;
+
+        if (!isCompleteRef.current) {
+          if (currentFrameRef.current < totalFrames - 1) {
+            currentFrameRef.current++;
+          } else {
+            isCompleteRef.current = true;
+          }
+          drawFrame();
+        } else {
+          drawFrame();
+          return;
+        }
+      }
+
       animationRef.current = requestAnimationFrame(animate);
     };
 
     animationRef.current = requestAnimationFrame(animate);
-    return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [isLoaded, canStartAnimation, totalFrames, isClosing]);
 
   // Close animation loop
@@ -311,17 +334,29 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
     canvas.style.transform = '';
     const frames = closeImagesRef.current;
 
+    const handleVisibility = () => {
+      if (!document.hidden) lastCloseFrameTimeRef.current = 0;
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     const animate = (timestamp) => {
       if (lastCloseFrameTimeRef.current === 0) {
-        lastCloseFrameTimeRef.current = timestamp - CARD_FRAME_DURATION;
+        lastCloseFrameTimeRef.current = timestamp;
+        animationRef.current = requestAnimationFrame(animate);
+        return;
       }
-      if (timestamp - lastCloseFrameTimeRef.current >= CARD_FRAME_DURATION) {
+
+      const elapsed = timestamp - lastCloseFrameTimeRef.current;
+
+      if (elapsed >= CARD_FRAME_DURATION) {
+        lastCloseFrameTimeRef.current = timestamp;
+
         const frame = frames[closeFrameRef.current];
         if (frame) {
           ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
           ctx.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
         }
-        lastCloseFrameTimeRef.current += CARD_FRAME_DURATION;
+
         if (closeFrameRef.current < frames.length - 1) {
           closeFrameRef.current++;
           animationRef.current = requestAnimationFrame(animate);
@@ -331,8 +366,6 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
             if (onGoToContact) onGoToContact();
           } else {
             if (fromGrid) {
-              // Shrink to CardDealAnimation's init state (scale 0.05, opacity 0)
-              // so the growing phase continues visually from the same starting point.
               canvas.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
               canvas.style.transform = 'scale(0.05)';
               canvas.style.opacity = '0';
@@ -349,7 +382,10 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
     };
 
     animationRef.current = requestAnimationFrame(animate);
-    return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [isClosing, isLoaded]);
 
   if (preload) return null;

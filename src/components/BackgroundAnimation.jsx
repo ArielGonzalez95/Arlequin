@@ -154,7 +154,7 @@ function BackgroundAnimation({ isDarkMode = true, isLowEnd = false, prefersReduc
       if (lastFrameTimeRef.current === 0) lastFrameTimeRef.current = timestamp;
       if (timestamp - lastFrameTimeRef.current >= FRAME_DURATION) {
         currentFrameRef.current = (currentFrameRef.current + 1) % TOTAL_FRAMES;
-        lastFrameTimeRef.current += FRAME_DURATION; // fixed timestep — no drift
+        lastFrameTimeRef.current = timestamp; // assign current tick — no jitter accumulation
         drawStars();
       }
       animationRef.current = requestAnimationFrame(animate);
