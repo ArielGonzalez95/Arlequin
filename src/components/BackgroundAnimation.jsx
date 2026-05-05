@@ -148,7 +148,8 @@ function BackgroundAnimation({ isDarkMode = true, isLowEnd = false, prefersReduc
     // Always draw one frame (static bg on low-end / reduced-motion)
     drawStars();
 
-    if (isLowEnd || prefersReducedMotion) return;
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (isLowEnd || (isMobile && prefersReducedMotion)) return;
 
     const animate = (timestamp) => {
       if (lastFrameTimeRef.current === 0) lastFrameTimeRef.current = timestamp;
