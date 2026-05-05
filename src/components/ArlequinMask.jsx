@@ -8,7 +8,7 @@ function getOpenDistance() {
     getComputedStyle(document.documentElement)
       .getPropertyValue('--mask-open-distance')
       .trim()
-  ) || 230;
+  ) || 224;
 }
 
 // Hook para calcular las posiciones basadas en el tamaño del contenedor
@@ -58,7 +58,7 @@ function ArlequinMask({ isDarkMode, phase, onTransitionEnd }) {
     // Fase logoShrinking/maskClosing/reverseClosing - máscara cerrada
     CLOSED:    { left: 'translateX(-9px)',    right: 'translateX(5px)' },
     // Fase maskOpening/contentVisible - máscara abierta
-    OPEN:     { left: 'translateX(-230px)', right: 'translateX(230px)' }
+    OPEN:     { left: 'translateX(-224px)', right: 'translateX(224px)' }
   };
   
   const positions = maskPositions || defaultTransforms;

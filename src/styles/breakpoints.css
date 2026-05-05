@@ -33,7 +33,7 @@
   /* ── Mask open distance — read by ArlequinMask.jsx ──────────────── */
   /* Must be large enough so mask decorations clear the cards-grid.    */
   /* Derived: maskHalfWidth + openDist - imgWidth ≥ gridHalfWidth + 20 */
-  --mask-open-distance: 280px;
+  --mask-open-distance: 224px;
 }
 
 /* ── Tablet portrait, 501–768px wide ────────────────────────────────── */
@@ -47,7 +47,7 @@
 /* ── Mask: tablet 601–900px ──────────────────────────────────────────── */
 @media (max-width: 900px) and (min-width: 601px) {
   :root {
-    --mask-open-distance: 260px;
+    --mask-open-distance: 208px;
   }
 }
 
@@ -56,7 +56,7 @@
   :root {
     --footer-height:    80px;
     --footer-clearance: 120px;  /* 80×1.4 visual + bottom + margin */
-    --mask-open-distance: 180px;
+    --mask-open-distance: 162px;
   }
 }
 
@@ -66,7 +66,7 @@
     --escudo-height:    72px;
     --escudo-top:       10px;
     --escudo-clearance: 98px;   /* 10 + 72 + 16 */
-    --mask-open-distance: 170px;
+    --mask-open-distance: 153px;
   }
 }
 
@@ -74,7 +74,7 @@
 @media (max-width: 390px) {
   :root {
     --escudo-clearance: 96px;   /* 10 + 72 + 14 */
-    --mask-open-distance: 155px;
+    --mask-open-distance: 140px;
   }
 }
 
@@ -82,7 +82,7 @@
 @media (max-width: 360px) {
   :root {
     --escudo-clearance: 92px;   /* 10 + 72 + 10 */
-    --mask-open-distance: 140px;
+    --mask-open-distance: 126px;
   }
 }
 
