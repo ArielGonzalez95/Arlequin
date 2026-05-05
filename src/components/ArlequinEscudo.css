@@ -31,7 +31,8 @@
 
 .arlequin-escudo .escudo-image {
   width: var(--escudo-height, 94px) !important;
-  height: auto !important;
+  height: var(--escudo-img-height, 138px) !important;
+  object-fit: contain;
   display: block !important;
 }
 

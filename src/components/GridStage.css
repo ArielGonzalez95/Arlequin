@@ -15,7 +15,7 @@
   padding: 20px;
   /* padding-top clears the fixed escudo; padding-bottom clears the footer.
      Both values come from breakpoints.css and update with media queries. */
-  padding-top: var(--escudo-clearance, 134px);
+  padding-top: var(--escudo-clearance, 178px);
   padding-bottom: var(--footer-clearance, 71px);
 }
 
@@ -139,7 +139,7 @@
 @media (max-height: 780px) and (min-width: 501px) {
   .grid-stage {
     padding: 8px;
-    padding-top: var(--escudo-clearance, 122px);
+    padding-top: var(--escudo-clearance, 163px);
     padding-bottom: var(--footer-clearance, 68px);
   }
   .cards-grid {
@@ -154,7 +154,7 @@
 @media (max-height: 650px) and (min-width: 501px) {
   .grid-stage {
     padding: 6px;
-    padding-top: var(--escudo-clearance, 100px);
+    padding-top: var(--escudo-clearance, 136px);
     padding-bottom: var(--footer-clearance, 64px);
   }
   .cards-grid {
@@ -169,7 +169,7 @@
 @media (max-height: 580px) and (min-width: 501px) {
   .grid-stage {
     padding: 4px;
-    padding-top: var(--escudo-clearance, 92px);
+    padding-top: var(--escudo-clearance, 128px);
     padding-bottom: var(--footer-clearance, 58px);
   }
   .cards-grid {
@@ -192,7 +192,7 @@
 @media (max-width: 500px) {
   .grid-stage {
     padding: 8px;
-    padding-top: var(--escudo-clearance, 134px);
+    padding-top: var(--escudo-clearance, 172px);
     padding-bottom: var(--footer-clearance, 120px);
   }
   .cards-grid {
@@ -208,7 +208,7 @@
 @media (max-width: 430px) {
   .grid-stage {
     padding: 6px;
-    padding-top: var(--escudo-clearance, 98px);
+    padding-top: var(--escudo-clearance, 136px);
     padding-bottom: var(--footer-clearance, 120px);
   }
   .cards-grid {
@@ -224,7 +224,7 @@
 @media (max-width: 390px) {
   .grid-stage {
     padding: 6px;
-    padding-top: var(--escudo-clearance, 96px);
+    padding-top: var(--escudo-clearance, 130px);
     padding-bottom: var(--footer-clearance, 120px);
   }
   .cards-grid {
@@ -240,7 +240,7 @@
 @media (max-width: 360px) {
   .grid-stage {
     padding: 4px;
-    padding-top: var(--escudo-clearance, 92px);
+    padding-top: var(--escudo-clearance, 126px);
     padding-bottom: var(--footer-clearance, 120px);
   }
   .cards-grid {
