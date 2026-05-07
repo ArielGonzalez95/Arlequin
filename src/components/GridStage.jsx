@@ -192,8 +192,8 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
       setTimeout(() => {
         setClickPhase('complete');
         onCardClick(index + 1);
-      }, 320);
-    }, 850);
+      }, 140);
+    }, 350);
   };
 
   const getCardStyle = (index) => {
@@ -279,7 +279,7 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
           return {
             transform: `translate(${tx}px, ${ty}px) scale(${scale})`,
             zIndex: 15,
-            transition: 'transform 0.32s ease-out',
+            transition: 'transform 0.14s ease-out',
           };
         }
         // stacking phase: slight forward pop only
@@ -295,7 +295,7 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
       const orderIndex = nonSelected.indexOf(index);
       const dx = (selCol - col) * colStep;
       const dy = (selRow - row) * rowStep;
-      const delay = 80 + orderIndex * 150;
+      const delay = 28 + orderIndex * 56;
       const deckOffset = (2 - orderIndex) * 3;
       const zIndex = (orderIndex + 1) * 2;
 
@@ -305,7 +305,7 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
           transform: `translate(${dx + deckOffset}px, ${dy + deckOffset}px) scale(0.93)`,
           zIndex,
           opacity: 0,
-          transition: 'opacity 0.15s ease-out',
+          transition: 'opacity 0.08s ease-out',
         };
       }
 
@@ -313,7 +313,7 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
         transform: `translate(${dx + deckOffset}px, ${dy + deckOffset}px) scale(0.93)`,
         zIndex,
         opacity: 0.85,
-        transition: `transform 0.45s ease-in ${delay}ms, opacity 0.45s ease-in ${delay}ms`,
+        transition: `transform 0.18s ease-in ${delay}ms, opacity 0.18s ease-in ${delay}ms`,
       };
     }
 
