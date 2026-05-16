@@ -21,7 +21,6 @@ const STAR_POSITIONS_DESKTOP = [
   [12, 92], [35, 95], [65, 95], [88, 92],
   [28, 28], [72, 28],
   [28, 72], [72, 72],
-  [50, 35], [20, 50], [80, 50], [50, 65],
 ];
 
 const STAR_POSITIONS_MOBILE = [
@@ -30,7 +29,7 @@ const STAR_POSITIONS_MOBILE = [
   [ 4, 62], [96, 68],
   [ 8, 90], [35, 94],
   [65, 94], [92, 90],
-  [50, 20], [50, 50], [20, 75], [75, 50],
+  [20, 75],
 ];
 
 function BackgroundAnimation({ isDarkMode = true, isLowEnd = false, prefersReducedMotion = false }) {

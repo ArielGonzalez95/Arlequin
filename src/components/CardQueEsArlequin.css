@@ -217,7 +217,7 @@
 
 .card-text {
   font-family: 'NewRocker-Regular', serif;
-  font-size: 14px;
+  font-size: 18px;
   line-height: 1.45;
   color: #ffffff;
   text-align: left;
@@ -228,6 +228,8 @@
 
 .card-text-paragraph {
   margin: 0 0 10px 0;
+  padding-left: 1.5px;
+  font-size: 20px;
   white-space: normal;
   word-break: break-word;
 }

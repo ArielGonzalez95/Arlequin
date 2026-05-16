@@ -68,7 +68,7 @@ const CLOSE_FRAMES_DARK = [
 const CARD_FINAL_FRAME_CLEAR = '00012_arlequin_frente_clear_fija.avif';
 const CARD_FINAL_FRAME_DARK   = '00012_arlequin_frente_dark_fija.avif';
 
-const CARD_FRAME_DURATION = 40;
+const CARD_FRAME_DURATION = 25;
 const CARD_WIDTH  = 550;
 const CARD_HEIGHT = 680;
 
@@ -77,79 +77,76 @@ const _closeCache = {};
 
 // ── 7 páginas de contenido ────────────────────────────────────────
 const page1Lines = [
-  { text: 'En Arlequín diseñamos y', indent: 0 },
-  { text: 'desarrollamos páginas web', indent: 0 },
-  { text: 'adaptadas a cada necesidad.', indent: 0 },
-  { text: 'Nos especializamos en brindar', indent: 0 },
-  { text: 'soluciones digitales claras,', indent: 0 },
-  { text: 'funcionales y visualmente', indent: 0 },
-  { text: 'atractivas.', indent: 0 },
-  { text: 'Estas son algunas de las', indent: 0 },
-  { text: 'páginas que podemos', indent: 0 },
-  { text: 'crear para vos:', indent: 0 },
-];
-
-const page2Lines = [
   { text: 'Landing Page', diamond: true },
   { text: '(Página de aterrizaje)', centered: true },
   { text: '' },
   { text: 'Ideal para campañas,' },
-  { text: 'lanzamientos, promociones' },
-  { text: 'o un único servicio.' },
-  { text: 'Rápida, directa y efectiva.' },
+  { text: 'lanzamientos o promociones.' },
+  { text: '' },
+  { text: '• Rápida' },
+  { text: '• Directa' },
+  { text: '• Enfocada en convertir' },
+];
+
+const page2Lines = [
+  { text: 'Sitio web profesional', diamond: true },
+  { text: 'o personal', centered: true },
+  { text: '' },
+  { text: 'Mostrá quién sos, tu' },
+  { text: 'experiencia y lo que hacés.' },
+  { text: 'Ideal para portfolios,' },
+  { text: 'freelancers o profesionales.' },
 ];
 
 const page3Lines = [
-  { text: 'Sitio personal o', diamond: true },
-  { text: 'profesional', centered: true },
+  { text: 'Página de turnos', diamond: true },
+  { text: 'o reservas', centered: true },
   { text: '' },
-  { text: 'Mostrá quién sos, tu' },
-  { text: 'experiencia, tu portfolio o' },
-  { text: 'tus servicios como' },
-  { text: 'freelancer, artista, médico,' },
-  { text: 'etc.' },
+  { text: 'Gestioná citas de forma' },
+  { text: 'simple y ordenada.' },
+  { text: 'Perfecta para peluquerías,' },
+  { text: 'estudios, consultorios y' },
+  { text: 'espacios de atención.' },
 ];
 
 const page4Lines = [
-  { text: 'Página de turnos o', diamond: true },
-  { text: 'reservas', centered: true },
+  { text: 'Sitio para negocios', diamond: true },
+  { text: 'o emprendimientos', centered: true },
   { text: '' },
-  { text: 'Perfecta para peluquerías,' },
-  { text: 'estudios, consultorios o' },
-  { text: 'espacios de atención que' },
-  { text: 'requieren gestión de citas.' },
+  { text: 'Mostrá tus productos o' },
+  { text: 'servicios y convertí visitas' },
+  { text: 'en clientes. Sumá formularios,' },
+  { text: 'integrá redes sociales y' },
+  { text: 'gestioná consultas fácilmente.' },
 ];
 
 const page5Lines = [
-  { text: 'Sitio para negocios o', diamond: true },
-  { text: 'emprendimientos', centered: true },
-  { text: '' },
-  { text: 'Mostrá tus productos o' },
-  { text: 'servicios, sumá formularios' },
-  { text: 'de contacto o consulta,' },
-  { text: 'integrá redes sociales y' },
-  { text: 'más.' },
-];
-
-const page6Lines = [
   { text: 'Sistemas de gestión', diamond: true },
   { text: 'a medida', centered: true },
   { text: '' },
-  { text: 'Creamos plataformas para' },
-  { text: 'administrar alquileres,' },
-  { text: 'turnos, pagos o lo que' },
-  { text: 'necesites, con acceso para' },
+  { text: 'Desarrollamos plataformas' },
+  { text: 'para administrar turnos,' },
+  { text: 'pagos, clientes o lo que' },
+  { text: 'necesites. Con acceso para' },
   { text: 'usuarios y administradores.' },
 ];
 
-const page7Lines = [
+const page6Lines = [
   { text: 'Productos digitales', diamond: true },
   { text: 'propios (próximamente)', centered: true },
   { text: '' },
   { text: 'Plataformas listas para usar,' },
-  { text: 'creadas por Arlequín,' },
-  { text: 'disponibles con suscripción' },
+  { text: 'desarrolladas por Arlequín.' },
+  { text: 'Disponibles bajo suscripción' },
   { text: 'mensual o anual.' },
+];
+
+const page7Lines = [
+  { text: '' },
+  { text: 'Completá el formulario de' },
+  { text: 'contacto y contanos qué' },
+  { text: 'servicio necesitás para' },
+  { text: 'tu proyecto.' },
 ];
 
 const cardTexts = [page1Lines, page2Lines, page3Lines, page4Lines, page5Lines, page6Lines, page7Lines];

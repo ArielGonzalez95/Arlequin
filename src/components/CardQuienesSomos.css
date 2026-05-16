@@ -64,3 +64,7 @@
   margin: 0;
   line-height: 1;
 }
+
+.quienes-somos-card-text .card-text-line {
+  font-size: 23px;
+}

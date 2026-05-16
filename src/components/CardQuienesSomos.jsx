@@ -70,7 +70,7 @@ const CLOSE_FRAMES_DARK = [
   '00000_arlequin_dorso_dark.avif',
 ];
 
-const CARD_FRAME_DURATION = 40;
+const CARD_FRAME_DURATION = 25;
 const CARD_WIDTH = 550;
 const CARD_HEIGHT = 680;
 
@@ -100,31 +100,12 @@ const PAGES = [
   {
     type: 'text',
     lines: [
-      { text: 'Juntos somos Arlequín, un', indent: 0 },
-      { text: 'equipo que combina', indent: 0 },
-      { text: 'múltiples disciplinas en una', indent: 0 },
-      { text: 'sola visión. Como el arlequín', indent: 0 },
-      { text: 'de otros tiempos, que fue', indent: 0 },
-      { text: 'actor, poeta, vestuarista y', indent: 0 },
-      { text: 'más, nosotros unimos', indent: 0 },
-      { text: 'diseño y desarrollo para', indent: 0 },
-      { text: 'traer herramientas digitales', indent: 0 },
-      { text: 'a medida.', indent: 0 },
-    ],
-  },
-  {
-    type: 'text',
-    lines: [
-      { text: 'Pensamos soluciones para', indent: 0 },
-      { text: 'que cada cliente pueda', indent: 0 },
-      { text: 'mostrar, gestionar y hacer', indent: 0 },
-      { text: 'crecer su negocio con', indent: 0 },
-      { text: 'identidad y fluidez.', indent: 0 },
+      { text: 'Traé tu idea,', indent: 0 },
+      { text: 'tu diamante en bruto.', indent: 0 },
+      { text: 'Nosotros lo pulimos', indent: 0 },
+      { text: 'para hacerlo brillar.', indent: 0 },
       { text: '', indent: 0 },
-      { text: 'Traé tu idea, tu tesoro, tu', indent: 0 },
-      { text: 'diamante.', indent: 0 },
-      { text: 'Nosotros lo pulimos para', indent: 0 },
-      { text: 'hacerla brillar.', indent: 0 },
+      { text: '♦️  ✨', indent: 0 },
     ],
   },
 ];
@@ -468,7 +449,7 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
           ) : (
             <div className="card-text-container">
               {/* Always white text since card background is always dark */}
-              <div className="card-text">
+              <div className="card-text quienes-somos-card-text">
                 {currentPage.lines.map((line, index) => (
                   <div key={index} className="card-text-line" style={{ marginRight: line.indent + 'px' }}>
                     {line.text}

@@ -199,7 +199,6 @@ function ArlequinMaskSystem({
               isDarkMode={isDarkMode}
               onClose={handleCardDetailClose}
               onCloseStart={handleCardDetailCloseStart}
-              onGoToContact={selectedCard === 1 ? handleGoToContact : undefined}
               fromGrid={cardFromGrid}
             />
           );

@@ -68,7 +68,7 @@ const CLOSE_FRAMES_DARK = [
 const CARD_FINAL_FRAME_CLEAR = '00012_arlequin_frente_clear_fija.avif';
 const CARD_FINAL_FRAME_DARK = '00012_arlequin_frente_dark_fija.avif';
 
-const CARD_FRAME_DURATION = 40;
+const CARD_FRAME_DURATION = 25;
 const CARD_WIDTH = 550;
 const CARD_HEIGHT = 680;
 
@@ -79,21 +79,32 @@ const _closeCache = {};
 const cardTexts = [
   [
     'Arlequín es una empresa enfocada en el diseño y desarrollo de soluciones digitales creativas.',
-    'Más que un nombre, Arlequín es un concepto. Representa al artista completo: alguien que combina distintas habilidades para crear, interpretar y resolver. Esa visión define la forma en que se abordan los proyectos, integrando creatividad y técnica en cada etapa, desde la idea hasta su desarrollo, para transformarlas en soluciones bien pensadas, bien diseñadas y bien ejecutadas.',
+  ],
+  [
+    'Más que un nombre, Arlequín es un concepto. Representa al artista completo: alguien que combina distintas habilidades para crear, interpretar y resolver.',
+  ],
+  [
+    'Esa visión define la forma en que se abordan los proyectos, integrando creatividad y técnica en cada etapa, desde la idea hasta su desarrollo, para transformarla en una solución bien pensada, bien diseñada y bien ejecutada.',
   ],
   [
     'Cada proyecto se aborda de forma integral, entendiendo el diseño no solo desde lo estético, sino también desde lo funcional. Cada solución busca responder a una necesidad real y generar una experiencia clara para quienes la utilizan.',
   ],
   [
-    'Arlequín diseña y desarrolla sitios web funcionales, adaptables a todo tipo de dispositivos, pensados tanto para el cliente final como para quienes administran un negocio. Se especializa en experiencia de usuario (UX), diseño visual (UI) y programación a medida, analizando cada necesidad para construir plataformas claras, intuitivas y efectivas.',
+    'Arlequín diseña y desarrolla sitios web funcionales, adaptables a todo tipo de dispositivos, pensados tanto para el cliente final como para quienes administran un negocio.',
+  ],
+  [
+    'Se especializa en experiencia de usuario (UX), diseño visual (UI) y programación a medida, analizando cada necesidad para construir plataformas claras, intuitivas y efectivas.',
   ],
   [
     'Además, desarrolla productos propios, como sistemas de gestión y plataformas con funcionalidades específicas, que pueden ser utilizados por terceros a través de un modelo de suscripción.',
     '(PRÓXIMAMENTE)',
   ],
+  [
+    '¿Querés saber todo lo que Arlequín puede hacer por vos? Visitá la sección de Servicios y descubrí cada una de las soluciones que tenemos para ofrecerte.',
+  ],
 ];
 
-function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, fromGrid = false, preload = false }) {
+function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false }) {
   const canvasRef = useRef(null);
   const imagesRef = useRef([]);
   const closeImagesRef = useRef([]);
@@ -104,7 +115,6 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
   const closeFrameRef = useRef(0);
   const lastCloseFrameTimeRef = useRef(0);
   const isLoadedRef = useRef(false);
-  const goingToContactRef = useRef(false);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [canStartAnimation, setCanStartAnimation] = useState(false);
@@ -124,10 +134,6 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
   const handleNextCard = () => {
     if (currentCardIndex < cardTexts.length - 1) {
       setCurrentCardIndex(prev => prev + 1);
-    } else if (onGoToContact) {
-      goingToContactRef.current = true;
-      setShowNavIcons(false);
-      setIsClosing(true);
     }
   };
 
@@ -361,10 +367,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
           closeFrameRef.current++;
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          if (goingToContactRef.current) {
-            goingToContactRef.current = false;
-            if (onGoToContact) onGoToContact();
-          } else {
+          {
             if (fromGrid) {
               canvas.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
               canvas.style.transform = 'scale(0.05)';
@@ -424,8 +427,9 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, onGoToContact, f
           <button
             className="card-nav-button card-nav-prev"
             onClick={handleNextCard}
-            title={isLastPage ? 'Contacto' : 'Página siguiente'}
-            style={{ opacity: 1, cursor: 'pointer' }}
+            title="Página siguiente"
+            disabled={isLastPage}
+            style={{ opacity: isLastPage ? 0.3 : 1, cursor: isLastPage ? 'default' : 'pointer' }}
           >
             <img src="/Cartas/arlequin_baraja_A_pieza_avanzar_web.avif" alt="Adelante" />
           </button>

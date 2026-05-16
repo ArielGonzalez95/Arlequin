@@ -38,7 +38,7 @@ const CARD_FRAMES_DARK = [
 const CARD_FINAL_FRAME_CLEAR = '00012_arlequin_frente_clear_fija.avif';
 const CARD_FINAL_FRAME_DARK = '00012_arlequin_frente_dark_fija.avif';
 
-const CARD_FRAME_DURATION = 30;
+const CARD_FRAME_DURATION = 25;
 const CARD_WIDTH = 550;
 const CARD_HEIGHT = 680;
 
