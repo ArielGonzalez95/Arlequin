@@ -46,8 +46,10 @@ const BTN_LOOP_END       = 71;
 const BTN_SEND_START     = 72;
 const BTN_SEND_END       = 168;
 const BTN_FRAME_DURATION = 40;
+const BTN_FRAME_DURATION_LOW_END = 60;
 const BTN_DISPLAY_WIDTH  = 500;
 const CARD_FRAME_DURATION = 40;
+const CARD_FRAME_DURATION_LOW_END = 60;
 const CARD_WIDTH  = 550;
 const CARD_HEIGHT = 680;
 
@@ -58,7 +60,10 @@ const _closeCache    = {};
 const _btnCache      = {};
 
 // ── Component ─────────────────────────────────────────────────────────────────
-function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false }) {
+function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false, isLowEnd = false, prefersReducedMotion = false }) {
+  const lowEndMode = isLowEnd || prefersReducedMotion;
+  const cardFrameDuration = lowEndMode ? CARD_FRAME_DURATION_LOW_END : CARD_FRAME_DURATION;
+  const btnFrameDuration  = lowEndMode ? BTN_FRAME_DURATION_LOW_END  : BTN_FRAME_DURATION;
   const canvasRef         = useRef(null);
   const openImagesRef     = useRef([]);
   const postSendImagesRef = useRef([]);
@@ -274,7 +279,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
         animRAFRef.current = requestAnimationFrame(animate);
         return;
       }
-      if (timestamp - lastTimeRef.current >= CARD_FRAME_DURATION) {
+      if (timestamp - lastTimeRef.current >= cardFrameDuration) {
         lastTimeRef.current = timestamp;
         const idx = frameIdxRef.current;
         const img = frames[idx];
@@ -506,8 +511,8 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
 
     const animate = (timestamp) => {
       if (btnLastTimeRef.current === 0) btnLastTimeRef.current = timestamp;
-      if (timestamp - btnLastTimeRef.current >= BTN_FRAME_DURATION) {
-        btnLastTimeRef.current += BTN_FRAME_DURATION;
+      if (timestamp - btnLastTimeRef.current >= btnFrameDuration) {
+        btnLastTimeRef.current += btnFrameDuration;
         const phase = btnPhaseRef.current;
         let frame;
         if (phase === 'loop') {

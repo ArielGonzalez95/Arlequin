@@ -339,3 +339,28 @@
     transform-origin: center center;
   }
 }
+
+/* ── Performance: pause infinite repaint loops on mobile ──────────
+   pulse-close and glow-behind animate filter/drop-shadow each frame,
+   which causes continuous repaint. The base (non-animated) state of
+   each element keeps its drop-shadow, so the visual identity is
+   preserved while removing the per-frame cost on small screens. */
+@media (max-width: 768px) {
+  .card-close-btn {
+    animation: none;
+  }
+  .card-nav-button::before {
+    animation: none;
+  }
+}
+
+/* Respect users who explicitly request reduced motion.
+   Only the infinite/decorative loops are paused — entry/exit transitions
+   are kept short so the card flow remains coherent. */
+@media (prefers-reduced-motion: reduce) {
+  .card-close-btn,
+  .card-nav-button::before,
+  .card-nav-button:hover::before {
+    animation: none !important;
+  }
+}

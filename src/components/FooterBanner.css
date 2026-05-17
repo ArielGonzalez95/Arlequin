@@ -45,3 +45,9 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .footer-banner-track {
+    animation: none;
+  }
+}
+

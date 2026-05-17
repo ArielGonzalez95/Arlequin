@@ -69,6 +69,7 @@ const CARD_FINAL_FRAME_CLEAR = '00012_arlequin_frente_clear_fija.avif';
 const CARD_FINAL_FRAME_DARK   = '00012_arlequin_frente_dark_fija.avif';
 
 const CARD_FRAME_DURATION = 25;
+const CARD_FRAME_DURATION_LOW_END = 50;
 const CARD_WIDTH  = 550;
 const CARD_HEIGHT = 680;
 
@@ -152,7 +153,8 @@ const page7Lines = [
 const cardTexts = [page1Lines, page2Lines, page3Lines, page4Lines, page5Lines, page6Lines, page7Lines];
 
 // ─────────────────────────────────────────────────────────────────
-function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false }) {
+function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false, isLowEnd = false, prefersReducedMotion = false }) {
+  const frameDuration = (isLowEnd || prefersReducedMotion) ? CARD_FRAME_DURATION_LOW_END : CARD_FRAME_DURATION;
   const canvasRef          = useRef(null);
   const imagesRef          = useRef([]);
   const closeImagesRef     = useRef([]);
@@ -331,7 +333,7 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
 
       const elapsed = timestamp - lastFrameTimeRef.current;
 
-      if (elapsed >= CARD_FRAME_DURATION) {
+      if (elapsed >= frameDuration) {
         lastFrameTimeRef.current = timestamp;
 
         if (!isCompleteRef.current) {
@@ -384,7 +386,7 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
 
       const elapsed = timestamp - lastCloseFrameTimeRef.current;
 
-      if (elapsed >= CARD_FRAME_DURATION) {
+      if (elapsed >= frameDuration) {
         lastCloseFrameTimeRef.current = timestamp;
 
         const frame = frames[closeFrameRef.current];

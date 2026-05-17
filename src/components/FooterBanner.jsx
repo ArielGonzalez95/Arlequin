@@ -7,15 +7,19 @@ function FooterBanner({ isDarkMode }) {
   return (
     <div className="footer-banner">
       <div className="footer-banner-track">
-        <img 
-          src={isDarkMode ? '/Cartas/arlequin_banner_zocalo_dark.avif' : '/Cartas/arlequin_banner_zocalo_clear.avif'} 
+        <img
+          src={isDarkMode ? '/Cartas/arlequin_banner_zocalo_dark.avif' : '/Cartas/arlequin_banner_zocalo_clear.avif'}
           alt="Footer banner"
           className="footer-banner-image"
+          loading="lazy"
+          decoding="async"
         />
-        <img 
-          src={isDarkMode ? '/Cartas/arlequin_banner_zocalo_dark.avif' : '/Cartas/arlequin_banner_zocalo_clear.avif'} 
+        <img
+          src={isDarkMode ? '/Cartas/arlequin_banner_zocalo_dark.avif' : '/Cartas/arlequin_banner_zocalo_clear.avif'}
           alt="Footer banner"
           className="footer-banner-image"
+          loading="lazy"
+          decoding="async"
         />
       </div>
     </div>

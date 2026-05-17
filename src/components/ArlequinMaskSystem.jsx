@@ -35,7 +35,9 @@ function ArlequinMaskSystem({
   phase,
   onReset,
   onMaskTransitionEnd,
-  onRequestMaskAnimation
+  onRequestMaskAnimation,
+  isLowEnd = false,
+  prefersReducedMotion = false
 }) {
   const [stage, setStage] = useState(STAGES.NONE);
   const [selectedCard, setSelectedCard] = useState(null);
@@ -200,6 +202,8 @@ function ArlequinMaskSystem({
               onClose={handleCardDetailClose}
               onCloseStart={handleCardDetailCloseStart}
               fromGrid={cardFromGrid}
+              isLowEnd={isLowEnd}
+              prefersReducedMotion={prefersReducedMotion}
             />
           );
         }

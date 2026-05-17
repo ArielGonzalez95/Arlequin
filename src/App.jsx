@@ -117,6 +117,8 @@ function App() {
         onReset={handleEscudoReset}
         onMaskTransitionEnd={handleMaskTransitionEnd}
         onRequestMaskAnimation={handleRequestMaskAnimation}
+        isLowEnd={isLowEnd}
+        prefersReducedMotion={prefersReducedMotion}
       />
 
       <FooterBanner isDarkMode={isDarkMode} />
