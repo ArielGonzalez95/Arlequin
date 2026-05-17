@@ -45,13 +45,23 @@ function getCloseFrames(theme) {
 const BTN_LOOP_END       = 71;
 const BTN_SEND_START     = 72;
 const BTN_SEND_END       = 168;
-const BTN_FRAME_DURATION = 40;
-const BTN_FRAME_DURATION_LOW_END = 60;
+// Decorative loop — lower FPS on mobile to avoid contention with form input.
+// 60 ms ≈ 17 FPS on mobile, still smooth enough for a button shimmer.
+const BTN_FRAME_DURATION_DESKTOP = 40;
+const BTN_FRAME_DURATION_MOBILE  = 60;
 const BTN_DISPLAY_WIDTH  = 500;
+// Match the other cards (CardQueEsArlequin, CardServicios) so the open
+// animation feels equally snappy. 13 frames × 25 ms = 325 ms.
 const CARD_FRAME_DURATION = 25;
-const CARD_FRAME_DURATION_LOW_END = 60;
 const CARD_WIDTH  = 550;
 const CARD_HEIGHT = 680;
+
+// DPR cap: 2 on desktop for crispness, 1.5 on mobile to cut the per-frame
+// drawImage cost ~44% while keeping cards sharp under their CSS scale.
+const getDpr = () => Math.min(
+  window.devicePixelRatio || 1,
+  window.matchMedia('(max-width: 768px)').matches ? 1.5 : 2
+);
 
 // ── Image caches (persist across theme toggles) ───────────────────────────────
 const _openCache     = {};
@@ -61,11 +71,6 @@ const _btnCache      = {};
 
 // ── Component ─────────────────────────────────────────────────────────────────
 function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false, isLowEnd = false, prefersReducedMotion = false }) {
-  // Only mobile gets the reduced FPS — desktop ALWAYS runs at the original rate
-  // to avoid any regression.
-  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
-  const cardFrameDuration = isMobile ? CARD_FRAME_DURATION_LOW_END : CARD_FRAME_DURATION;
-  const btnFrameDuration  = isMobile ? BTN_FRAME_DURATION_LOW_END  : BTN_FRAME_DURATION;
   const canvasRef         = useRef(null);
   const openImagesRef     = useRef([]);
   const postSendImagesRef = useRef([]);
@@ -240,7 +245,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     if (!isLoaded) return;
     const canvas = canvasRef.current;
     const ctx    = canvas.getContext('2d');
-    const dpr = Math.min(window.devicePixelRatio || 1, 2); // cap at 2x for 60Hz mobile perf
+    const dpr = getDpr();
     canvas.width  = Math.round(CARD_WIDTH * dpr);
     canvas.height = Math.round(CARD_HEIGHT * dpr);
     canvas.style.width  = `${CARD_WIDTH}px`;
@@ -281,7 +286,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
         animRAFRef.current = requestAnimationFrame(animate);
         return;
       }
-      if (timestamp - lastTimeRef.current >= cardFrameDuration) {
+      if (timestamp - lastTimeRef.current >= CARD_FRAME_DURATION) {
         lastTimeRef.current = timestamp;
         const idx = frameIdxRef.current;
         const img = frames[idx];
@@ -493,7 +498,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     const firstFrame = btnLoopFramesRef.current[0];
     if (!firstFrame) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = getDpr();
     const w = firstFrame.naturalWidth;
     const h = firstFrame.naturalHeight;
     const displayH = Math.round(h * BTN_DISPLAY_WIDTH / w);
@@ -510,6 +515,9 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
 
     ctx.clearRect(0, 0, w, h);
     ctx.drawImage(firstFrame, 0, 0, w, h);
+
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const btnFrameDuration = isMobile ? BTN_FRAME_DURATION_MOBILE : BTN_FRAME_DURATION_DESKTOP;
 
     const animate = (timestamp) => {
       if (btnLastTimeRef.current === 0) btnLastTimeRef.current = timestamp;

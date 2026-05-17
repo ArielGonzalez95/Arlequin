@@ -41,6 +41,12 @@ function ArlequinMaskSystem({
 }) {
   const [stage, setStage] = useState(STAGES.NONE);
   const [selectedCard, setSelectedCard] = useState(null);
+  // When the deal animation ends we keep CardDealAnimation mounted for an
+  // extra ~150 ms while GridStage paints in the same coordinates. Avoids
+  // the unmount→mount gap that produced a one-frame "cards disappear" flash
+  // on mobile Safari at the exact moment the text overlays became visible.
+  const [dealLingerVisible, setDealLingerVisible] = useState(false);
+  const dealLingerTimerRef = useRef(null);
   const [cardFromGrid, setCardFromGrid] = useState(false);
   const [isShrinkingOut, setIsShrinkingOut] = useState(false);
   const [preloadCard, setPreloadCard] = useState(null);
@@ -99,8 +105,22 @@ function ArlequinMaskSystem({
 
   // Called by CardDealAnimation when Phase B finishes (both initial entry and close return)
   const handleDealAnimationComplete = useCallback(() => {
-    setIsCardExpanding(false); // restore escudo visibility
+    // Mount GridStage first so its cards paint underneath the still-mounted
+    // CardDealAnimation, then drop the linger flag after a couple of frames.
     setStage(STAGES.GRID);
+    setDealLingerVisible(true);
+    if (dealLingerTimerRef.current) clearTimeout(dealLingerTimerRef.current);
+    dealLingerTimerRef.current = setTimeout(() => {
+      setDealLingerVisible(false);
+      // Restore escudo visibility AFTER the swap is done so its scale
+      // transition doesn't compound with the card swap in the same frame.
+      setIsCardExpanding(false);
+      dealLingerTimerRef.current = null;
+    }, 150);
+  }, []);
+
+  useEffect(() => () => {
+    if (dealLingerTimerRef.current) clearTimeout(dealLingerTimerRef.current);
   }, []);
 
   // Handle NO click - close and reopen mask before showing card detail
@@ -171,13 +191,6 @@ function ArlequinMaskSystem({
   // Render current stage content
   const renderStageContent = () => {
     switch (stage) {
-      case STAGES.DEALING:
-        return (
-          <CardDealAnimation
-            isDarkMode={isDarkMode}
-            onDealComplete={handleDealAnimationComplete}
-          />
-        );
       case STAGES.QUESTION:
         return (
           <QuestionStage
@@ -240,8 +253,17 @@ function ArlequinMaskSystem({
 
       {stage !== STAGES.MASK_SHOWING && stage !== STAGES.NONE && (
         <div className={`mask-content${isShrinkingOut ? ' shrinking-out' : ''}`}>
-          {/* GridStage only mounts in stable GRID stage; CardDealAnimation handles
-              both entry and return-from-card transitions, so no display:none trick needed */}
+          {/* CardDealAnimation rendered FIRST so it sits behind GridStage during
+              the linger window. Once GridStage is mounted, it paints the cards
+              (with text overlay) on top — when CardDealAnimation unmounts there
+              is no paint gap because GridStage has already taken over the same
+              coordinates. */}
+          {(stage === STAGES.DEALING || dealLingerVisible) && (
+            <CardDealAnimation
+              isDarkMode={isDarkMode}
+              onDealComplete={handleDealAnimationComplete}
+            />
+          )}
           {stage === STAGES.GRID && (
             <GridStage
               onCardClick={handleGridCardClick}

@@ -29,6 +29,13 @@ function App() {
   const [phase, setPhase] = useState(ANIMATION_PHASE.HOME);
   const { isLowEnd, prefersReducedMotion } = useLowEndDevice();
 
+  // Pause background + toggle RAF loops once the mask has opened and the user
+  // is interacting with content. The card stack and grid animations need the
+  // main thread; ambient star canvases drawing in parallel are the difference
+  // between a 60-FPS click→expand and a janky one on mobile. The background
+  // is barely visible during these stages anyway.
+  const ambientPaused = phase === ANIMATION_PHASE.CONTENT_VISIBLE;
+
   useEffect(() => {
     localStorage.setItem(THEME_STORAGE_KEY, isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
@@ -99,8 +106,8 @@ function App() {
 
   return (
     <div className="app">
-      <BackgroundAnimation isDarkMode={isDarkMode} isLowEnd={isLowEnd} prefersReducedMotion={prefersReducedMotion} />
-      <ThemeToggleStar isDarkMode={isDarkMode} onToggle={handleToggle} isLowEnd={isLowEnd} />
+      <BackgroundAnimation isDarkMode={isDarkMode} isLowEnd={isLowEnd} prefersReducedMotion={prefersReducedMotion} isPaused={ambientPaused} />
+      <ThemeToggleStar isDarkMode={isDarkMode} onToggle={handleToggle} isLowEnd={isLowEnd} isPaused={ambientPaused} />
 
       <LogoAnimation
         isDarkMode={isDarkMode}

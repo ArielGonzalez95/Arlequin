@@ -69,9 +69,16 @@ const CARD_FINAL_FRAME_CLEAR = '00012_arlequin_frente_clear_fija.avif';
 const CARD_FINAL_FRAME_DARK = '00012_arlequin_frente_dark_fija.avif';
 
 const CARD_FRAME_DURATION = 25;
-const CARD_FRAME_DURATION_LOW_END = 50;
 const CARD_WIDTH = 550;
 const CARD_HEIGHT = 680;
+
+// DPR cap: 2 on desktop for crispness, 1.5 on mobile to cut the per-frame
+// drawImage cost ~44%. The card is CSS-scaled below 1 on small screens so
+// the visual hit is minor while old phones gain real headroom at 40 FPS.
+const getDpr = () => Math.min(
+  window.devicePixelRatio || 1,
+  window.matchMedia('(max-width: 768px)').matches ? 1.5 : 2
+);
 
 // Module-level cache — persists across mounts so re-opens are instant
 const _openCache  = {};
@@ -106,11 +113,6 @@ const cardTexts = [
 ];
 
 function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false, isLowEnd = false, prefersReducedMotion = false }) {
-  // Only mobile gets the reduced FPS — desktop ALWAYS runs at the original rate
-  // to avoid any regression. isLowEnd/prefersReducedMotion act as kill-switches
-  // on top of mobile detection.
-  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
-  const frameDuration = isMobile ? CARD_FRAME_DURATION_LOW_END : CARD_FRAME_DURATION;
   const canvasRef = useRef(null);
   const imagesRef = useRef([]);
   const closeImagesRef = useRef([]);
@@ -247,7 +249,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
     if (!isLoaded) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = getDpr();
     canvas.width = Math.round(CARD_WIDTH * dpr);
     canvas.height = Math.round(CARD_HEIGHT * dpr);
     canvas.style.width = `${CARD_WIDTH}px`;
@@ -266,7 +268,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = getDpr();
     canvas.width = Math.round(CARD_WIDTH * dpr);
     canvas.height = Math.round(CARD_HEIGHT * dpr);
     canvas.style.width = `${CARD_WIDTH}px`;
@@ -306,7 +308,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
 
       const elapsed = timestamp - lastFrameTimeRef.current;
 
-      if (elapsed >= frameDuration) {
+      if (elapsed >= CARD_FRAME_DURATION) {
         lastFrameTimeRef.current = timestamp;
 
         if (!isCompleteRef.current) {
@@ -360,7 +362,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
 
       const elapsed = timestamp - lastCloseFrameTimeRef.current;
 
-      if (elapsed >= frameDuration) {
+      if (elapsed >= CARD_FRAME_DURATION) {
         lastCloseFrameTimeRef.current = timestamp;
 
         const frame = frames[closeFrameRef.current];

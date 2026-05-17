@@ -99,11 +99,14 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
     const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => {
         setDealPhase('dealing');
+        // Match the longest card animation: 360ms delay + 420ms duration = 780ms.
+        // 820ms gives a small safety margin so the last card finishes before
+        // we strip the inline transform and the text overlay fades in.
         dealTimerRef.current = setTimeout(() => {
           dealTimerRef.current = null;
           setDealPhase('idle');
           if (onDealComplete) onDealComplete();
-        }, 700);
+        }, 820);
       });
     });
 
@@ -328,7 +331,7 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
         {CARD_LABELS.map((label, index) => (
           <button
             key={index}
-            className="grid-card"
+            className={`grid-card${(clickPhase !== 'idle' || dealPhase !== 'idle') ? ' grid-card--locked' : ''}`}
             style={getCardStyle(index)}
             onClick={() => handleCardClick(index)}
             onMouseEnter={() => {
@@ -337,21 +340,24 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
             onTouchStart={() => {
               if (clickPhase === 'idle' && dealPhase === 'idle' && onCardPreClick) onCardPreClick(index + 1);
             }}
-            disabled={clickPhase !== 'idle' || dealPhase !== 'idle'}
+            aria-disabled={clickPhase !== 'idle' || dealPhase !== 'idle'}
           >
             <div className="card-back">
               <img
                 src={`/Cartas/00000_arlequin_dorso_${themeSuffix}.avif`}
                 alt={`Card ${index + 1}`}
               />
-              {dealPhase === 'idle' && clickPhase === 'idle' && (
-                <div className="card-text-overlay">
-                  {index === 0 && <><div>¿Qué es</div><div>Arlequín?</div></>}
-                  {index === 1 && <><div>¿Quiénes</div><div>somos?</div></>}
-                  {index === 2 && <div>Servicios</div>}
-                  {index === 3 && <div>Contacto</div>}
-                </div>
-              )}
+              {/* Always mount the overlay so its GPU layer (text filter +
+                  drop-shadow) is created upfront. Visibility is toggled via
+                  the .visible class — avoids the mount-time flash on mobile
+                  Safari where a fresh filter promotion can repaint the
+                  parent. */}
+              <div className={`card-text-overlay${dealPhase === 'idle' && clickPhase === 'idle' ? ' visible' : ''}`}>
+                {index === 0 && <><div>¿Qué es</div><div>Arlequín?</div></>}
+                {index === 1 && <><div>¿Quiénes</div><div>somos?</div></>}
+                {index === 2 && <div>Servicios</div>}
+                {index === 3 && <div>Contacto</div>}
+              </div>
             </div>
           </button>
         ))}

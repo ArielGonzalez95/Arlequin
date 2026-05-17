@@ -40,6 +40,21 @@
   cursor: pointer;
   padding: 0;
   z-index: 1;
+  /* Keep the card on its own GPU layer (translateZ keeps it composited)
+     but DON'T use will-change: the latter signals "actively changing" and
+     mobile Safari releases the layer when the inline transform animation
+     ends, causing a paint flash when dealPhase flips to idle. */
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Use a CSS class instead of the disabled attribute to lock interactions.
+   The disabled attribute triggers a :disabled pseudo-class style change at
+   the deal→idle transition, which mobile Safari treats as a full repaint
+   of the button. */
+.grid-card--locked {
+  pointer-events: none;
 }
 
 @media (hover: hover) {
@@ -85,7 +100,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   opacity: 0;
-  animation: card-text-fade-in 200ms ease-out both;
+  transition: opacity 200ms ease-out;
   font-family: "CinzelExtraBold", serif;
   font-weight: 900;
   font-size: 22px;
@@ -100,27 +115,34 @@
   gap: 8px;
 }
 
-@keyframes card-text-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+.card-text-overlay.visible {
+  opacity: 1;
 }
 
 .card-text-overlay div {
   line-height: calc(1.1em + 1px);
 }
 
-/* Modo dark: texto negro, borde blanco fino uniforme + sombra abajo */
+/* Modo dark: texto negro, borde blanco fino uniforme + sombra abajo.
+   Usamos text-shadow en los hijos en lugar de filter: drop-shadow() en el
+   contenedor — filter crea un stacking context que mobile Safari repinta
+   cuando cambian propiedades del padre, causando el flash visible al
+   terminar el deal. text-shadow se renderiza inline con el texto. */
 .grid-stage.dark .card-text-overlay {
   color: #000000;
   -webkit-text-stroke: 1.5px #ffffff;
-  filter: drop-shadow(0 2px 0 #ffffff);
+}
+.grid-stage.dark .card-text-overlay div {
+  text-shadow: 0 2px 0 #ffffff;
 }
 
 /* Modo clear: texto blanco, borde negro fino uniforme + sombra abajo */
 .grid-stage:not(.dark) .card-text-overlay {
   color: #ffffff;
   -webkit-text-stroke: 1.5px #000000;
-  filter: drop-shadow(0 2px 0 #000000);
+}
+.grid-stage:not(.dark) .card-text-overlay div {
+  text-shadow: 0 2px 0 #000000;
 }
 
 .grid-card .card-label {

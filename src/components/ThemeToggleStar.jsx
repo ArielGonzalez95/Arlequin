@@ -11,7 +11,7 @@ const FRAME_PATH_DARK = '/estrellas/estrella_giro_dark_';
 // Module-level cache — shares loaded images with BackgroundAnimation if mounted first.
 const _starCache = { clear: null, dark: null };
 
-function ThemeToggleStar({ isDarkMode, onToggle, isLowEnd = false }) {
+function ThemeToggleStar({ isDarkMode, onToggle, isLowEnd = false, isPaused = false }) {
   const canvasRef = useRef(null);
   const imagesRef = useRef({ clear: [], dark: [] });
   const animationRef = useRef(null);
@@ -94,6 +94,9 @@ function ThemeToggleStar({ isDarkMode, onToggle, isLowEnd = false }) {
 
     drawFrame();
 
+    // External pause (e.g. when a card detail is open) — free up the main thread.
+    if (isPaused) return;
+
     // Skip animation only on mobile low-end devices — desktop always animates.
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
     if (isLowEnd && isMobile) return;
@@ -118,7 +121,7 @@ function ThemeToggleStar({ isDarkMode, onToggle, isLowEnd = false }) {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [isLoaded, isDarkMode, isLowEnd]);
+  }, [isLoaded, isDarkMode, isLowEnd, isPaused]);
 
   const tooltipText = isDarkMode ? 'Modo claro' : 'Modo oscuro';
 

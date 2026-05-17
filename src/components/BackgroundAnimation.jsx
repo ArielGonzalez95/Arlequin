@@ -32,7 +32,7 @@ const STAR_POSITIONS_MOBILE = [
   [20, 75],
 ];
 
-function BackgroundAnimation({ isDarkMode = true, isLowEnd = false, prefersReducedMotion = false }) {
+function BackgroundAnimation({ isDarkMode = true, isLowEnd = false, prefersReducedMotion = false, isPaused = false }) {
   const canvasRef = useRef(null);
   const imagesRef = useRef({ clear: [], dark: [] });
   const animationRef = useRef(null);
@@ -146,8 +146,12 @@ function BackgroundAnimation({ isDarkMode = true, isLowEnd = false, prefersReduc
       }
     };
 
-    // Always draw one frame (static bg on low-end mobile / reduced-motion mobile)
+    // Always draw one frame (static bg on low-end mobile / reduced-motion mobile / paused)
     drawStars();
+
+    // External pause (e.g. when a card detail is open and covers the viewport).
+    // No need to burn CPU painting stars the user can't see.
+    if (isPaused) return;
 
     // Skip animation only on mobile devices that are constrained or whose user
     // opted into reduced motion. Desktop ALWAYS animates regardless of what
@@ -171,7 +175,7 @@ function BackgroundAnimation({ isDarkMode = true, isLowEnd = false, prefersReduc
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [isLoaded, isDarkMode, isLowEnd, prefersReducedMotion]);
+  }, [isLoaded, isDarkMode, isLowEnd, prefersReducedMotion, isPaused]);
 
   return <canvas ref={canvasRef} className="background-canvas" />;
 }
