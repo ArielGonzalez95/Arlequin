@@ -6,14 +6,18 @@ const GROW_DURATION = 600;
 const FLY_DURATION  = 420;
 const FLY_STAGGER   = 120;
 
-function CardDealAnimation({ isDarkMode, onDealComplete }) {
+function CardDealAnimation({ isDarkMode, onDealComplete, skipGrow = false }) {
   const gridRef     = useRef(null);
   const themeSuffix = isDarkMode ? 'dark' : 'clear';
 
   // half-step between cards in each axis — computed from DOM
   const [offsets, setOffsets] = useState(null);
   // init → growing → dealing
-  const [phase, setPhase] = useState('init');
+  // When skipGrow is true (close-from-card handoff), we start at 'growing-end'
+  // so the deck is already at full grid size and visible at center, then go
+  // straight to the deal — avoids the "card shrinks to nothing then grows
+  // back" effect when returning from a card detail.
+  const [phase, setPhase] = useState(skipGrow ? 'growing-end' : 'init');
 
   // Mark _dorsoCached so GridStage mounts synchronously loaded (no flash)
   const handleImgLoad = () => { _dorsoCached[themeSuffix] = true; };
@@ -33,28 +37,42 @@ function CardDealAnimation({ isDarkMode, onDealComplete }) {
     });
   }, []);
 
-  // Animation sequence: init → growing → dealing → onDealComplete
+  // Animation sequence:
+  //   Normal mount  : init → growing → dealing → onDealComplete
+  //   skipGrow mount: growing-end → dealing → onDealComplete (no shrink/grow)
   useEffect(() => {
     if (!offsets) return;
     let raf1, raf2, t1, t2;
-    // 2 RAFs: ensure init frame is painted before transition starts
-    raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        setPhase('growing');
-        t1 = setTimeout(() => {
+
+    if (skipGrow) {
+      // 2 RAFs so the painted "growing-end" frame is visible before the
+      // dealing transition starts (otherwise the browser may collapse the
+      // two state changes into the same paint and the cards skip the deck).
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => {
           setPhase('dealing');
-          // last card finishes at FLY_DURATION + stagger * 3; buffer = 80ms
           t2 = setTimeout(onDealComplete, FLY_DURATION + FLY_STAGGER * 3 + 80);
-        }, GROW_DURATION + 50);
+        });
       });
-    });
+    } else {
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => {
+          setPhase('growing');
+          t1 = setTimeout(() => {
+            setPhase('dealing');
+            t2 = setTimeout(onDealComplete, FLY_DURATION + FLY_STAGGER * 3 + 80);
+          }, GROW_DURATION + 50);
+        });
+      });
+    }
+
     return () => {
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [offsets, onDealComplete]);
+  }, [offsets, onDealComplete, skipGrow]);
 
   const getCardStyle = (index) => {
     if (!offsets) return { opacity: 0 };
@@ -88,6 +106,20 @@ function CardDealAnimation({ isDarkMode, onDealComplete }) {
                      opacity 300ms ease-out`,
         zIndex: 4 - index,
         willChange: 'transform, opacity',
+      };
+    }
+
+    if (phase === 'growing-end') {
+      // skipGrow: deck already at full size at center, no transition. Used when
+      // CardDealAnimation mounts to pick up from a card-detail close — the
+      // detail canvas has just finished its flip-to-dorso and shrunk to grid
+      // size at center, so we mount in that exact state.
+      return {
+        opacity: 1,
+        transform: `translateX(${dx}px) translateY(${dy}px) scale(1)`,
+        transition: 'none',
+        zIndex: 4 - index,
+        willChange: 'transform',
       };
     }
 

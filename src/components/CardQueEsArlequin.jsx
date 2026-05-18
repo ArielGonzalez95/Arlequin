@@ -377,10 +377,14 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
         } else {
           {
             if (fromGrid) {
-              canvas.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
-              canvas.style.transform = 'scale(0.05)';
-              canvas.style.opacity = '0';
-              setTimeout(() => onClose(), 350);
+              // Shrink the dorso to approximately grid-card size at center,
+              // staying fully visible. CardDealAnimation will then mount with
+              // skipGrow at this size — the user sees a continuous dorso at
+              // center that splits into the deck and deals out, instead of
+              // the card vanishing and a new deck re-appearing from nothing.
+              canvas.style.transition = 'transform 0.3s ease-in';
+              canvas.style.transform = 'scale(0.5)';
+              setTimeout(() => onClose(), 300);
             } else {
               setIsScalingDown(true);
               setTimeout(() => onClose(), 400);

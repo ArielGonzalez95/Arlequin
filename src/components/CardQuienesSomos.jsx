@@ -372,10 +372,11 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
           animationRef.current = requestAnimationFrame(animate);
         } else {
           if (fromGrid) {
-            canvas.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
-            canvas.style.transform = 'scale(0.05)';
-            canvas.style.opacity = '0';
-            setTimeout(() => onClose(), 350);
+            // Stay visible at center as a dorso roughly the size of a grid
+            // card; CardDealAnimation picks up from there with skipGrow.
+            canvas.style.transition = 'transform 0.3s ease-in';
+            canvas.style.transform = 'scale(0.5)';
+            setTimeout(() => onClose(), 300);
           } else {
             setIsScalingDown(true);
             setTimeout(() => onClose(), 400);

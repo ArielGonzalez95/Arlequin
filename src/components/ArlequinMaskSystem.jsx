@@ -49,6 +49,10 @@ function ArlequinMaskSystem({
   // on mobile Safari at the exact moment the text overlays became visible.
   const [dealLingerVisible, setDealLingerVisible] = useState(false);
   const dealLingerTimerRef = useRef(null);
+  // 'initial': normal deal with grow phase (logo → grid flow).
+  // 'fromCardClose': skip the grow phase — the card detail just shrank to
+  //   grid size at center, so the deck is already visible there.
+  const [dealMode, setDealMode] = useState('initial');
   const [cardFromGrid, setCardFromGrid] = useState(false);
   const [isShrinkingOut, setIsShrinkingOut] = useState(false);
   const [preloadCard, setPreloadCard] = useState(null);
@@ -111,6 +115,11 @@ function ArlequinMaskSystem({
     // CardDealAnimation, then drop the linger flag after a couple of frames.
     setStage(STAGES.GRID);
     setDealLingerVisible(true);
+    // Reset the deal mode now that the deal is complete — the next deal (if
+    // user re-opens & closes a card) will need to set it again from
+    // handleCardDetailClose if applicable. Resetting here keeps the state
+    // honest for any future open-from-logo path.
+    setDealMode('initial');
     if (dealLingerTimerRef.current) clearTimeout(dealLingerTimerRef.current);
     dealLingerTimerRef.current = setTimeout(() => {
       setDealLingerVisible(false);
@@ -191,9 +200,12 @@ function ArlequinMaskSystem({
 
   // Handle close from individual card detail — re-run deal animation instead of
   // reverse-deal in GridStage, which avoids the size jump from canvas padding mismatch.
+  // dealMode='fromCardClose' tells CardDealAnimation to skip its grow phase
+  // because the detail canvas has already shrunk to grid size at center.
   const handleCardDetailClose = useCallback(() => {
     setSelectedCard(null);
     setCardFromGrid(false);
+    setDealMode('fromCardClose');
     setStage(STAGES.DEALING);
   }, []);
 
@@ -278,6 +290,7 @@ function ArlequinMaskSystem({
             <CardDealAnimation
               isDarkMode={isDarkMode}
               onDealComplete={handleDealAnimationComplete}
+              skipGrow={dealMode === 'fromCardClose'}
             />
           )}
           {stage === STAGES.GRID && (
