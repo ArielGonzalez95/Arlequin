@@ -3,8 +3,8 @@ import { _dorsoCached } from './GridStage';
 import './CardDealAnimation.css';
 
 const GROW_DURATION = 600;
-const FLY_DURATION  = 500;
-const FLY_STAGGER   = 60;
+const FLY_DURATION  = 420;
+const FLY_STAGGER   = 120;
 
 function CardDealAnimation({ isDarkMode, onDealComplete }) {
   const gridRef     = useRef(null);
@@ -65,40 +65,42 @@ function CardDealAnimation({ isDarkMode, onDealComplete }) {
     //   card 1 (top-right)    → translate(-hw, +hh)
     //   card 2 (bottom-left)  → translate(+hw, -hh)
     //   card 3 (bottom-right) → translate(-hw, -hh)
-    const dx  = index % 2 === 0 ?  hw : -hw;
-    const dy  = index < 2        ?  hh : -hh;
-    const rot = index % 2 === 0 ? -8  :  8;  // arc direction
+    const dx = index % 2 === 0 ?  hw : -hw;
+    const dy = index < 2        ?  hh : -hh;
 
     if (phase === 'init') {
       return {
         opacity: 0,
-        transform: `translateX(${dx}px) translateY(${dy}px) scale(0.05) rotate(0deg)`,
+        transform: `translateX(${dx}px) translateY(${dy}px) scale(0.05)`,
         transition: 'none',
+        zIndex: 4 - index,
         willChange: 'transform, opacity',
       };
     }
 
     if (phase === 'growing') {
+      // All 4 cards stacked at center, growing together → visually appears as a
+      // single card emerging at full size. zIndex keeps card 0 on top of the deck.
       return {
         opacity: 1,
-        transform: `translateX(${dx}px) translateY(${dy}px) scale(1) rotate(0deg)`,
+        transform: `translateX(${dx}px) translateY(${dy}px) scale(1)`,
         transition: `transform ${GROW_DURATION}ms cubic-bezier(0.34, 1.56, 0.64, 1),
                      opacity 300ms ease-out`,
+        zIndex: 4 - index,
         willChange: 'transform, opacity',
       };
     }
 
     if (phase === 'dealing') {
+      // OLD style: cards leave the stack one by one with 120 ms stagger, no arc.
+      // Card 0 (top of stack) flies first; card 3 (bottom) flies last and lands
+      // last. Matches the original GridStage runDeal(false) cadence the user
+      // preferred — feels like an actual deal rather than a fan.
       return {
-        '--deal-dx':  `${dx}px`,
-        '--deal-dy':  `${dy}px`,
-        '--deal-rot': `${rot}deg`,
-        animationName:           'deal-fly-out',
-        animationDuration:       `${FLY_DURATION}ms`,
-        animationTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        animationDelay:          `${index * FLY_STAGGER}ms`,
-        animationFillMode:       'both',
-        willChange:              'transform',
+        transform: 'translate(0px, 0px) scale(1)',
+        transition: `transform ${FLY_DURATION}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${index * FLY_STAGGER}ms`,
+        zIndex: 4 - index,
+        willChange: 'transform',
       };
     }
 

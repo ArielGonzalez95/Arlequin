@@ -5,6 +5,7 @@ import QuestionStage from './QuestionStage';
 import CardStage from './CardStage';
 import GridStage from './GridStage';
 import CardDealAnimation from './CardDealAnimation';
+import CardCollectAnimation from './CardCollectAnimation';
 import CardQueEsArlequin from './CardQueEsArlequin';
 import CardQuienesSomos from './CardQuienesSomos';
 import CardServicios from './CardServicios';
@@ -17,9 +18,10 @@ const STAGES = {
   MASK_SHOWING: 'mask_showing',
   QUESTION: 'question',
   CARD: 'card',
-  DEALING: 'dealing',   // CardDealAnimation phase before grid is stable
+  DEALING: 'dealing',       // CardDealAnimation phase before grid is stable
   GRID: 'grid',
-  CARD_DETAIL: 'card_detail'
+  CARD_DETAIL: 'card_detail',
+  COLLECTING: 'collecting'  // CardCollectAnimation runs before mask closes back to home
 };
 
 // Map card index to component
@@ -138,13 +140,27 @@ function ArlequinMaskSystem({
     setStage(STAGES.GRID);
   }, []);
 
-  // Handle clicking on escudo - shrink content out first, then start reverse animation
+  // Handle clicking on escudo. If the user is on the GRID, run the
+  // collect → shrink animation (reverse of CardDealAnimation) before
+  // triggering the mask close. From any other stage, fall back to the
+  // legacy mask-content shrink-out (there are no cards to gather).
   const handleEscudoClick = useCallback(() => {
+    if (stage === STAGES.GRID) {
+      setStage(STAGES.COLLECTING);
+      return;
+    }
     setIsShrinkingOut(true);
     setTimeout(() => {
       setIsShrinkingOut(false);
       if (onReset) onReset();
     }, 380);
+  }, [onReset, stage]);
+
+  // Called by CardCollectAnimation when the deck has fully gathered and
+  // shrunk to a tiny invisible point at center — that's the moment we hand
+  // off to the parent so the mask close animation runs over the empty stage.
+  const handleCollectComplete = useCallback(() => {
+    if (onReset) onReset();
   }, [onReset]);
 
   // Handle grid card pre-click - preload images in background
@@ -272,6 +288,12 @@ function ArlequinMaskSystem({
               onDealComplete={handleDealComplete}
               isDarkMode={isDarkMode}
               dealKey={dealKey}
+            />
+          )}
+          {stage === STAGES.COLLECTING && (
+            <CardCollectAnimation
+              isDarkMode={isDarkMode}
+              onCollectComplete={handleCollectComplete}
             />
           )}
           {renderStageContent()}
