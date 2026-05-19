@@ -405,11 +405,12 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
           animationRef.current = requestAnimationFrame(animate);
         } else {
           if (fromGrid) {
+            canvas.style.transition = 'transform 0.2s ease-in, opacity 0.2s ease-in';
             setTimeout(() => {
-              canvas.style.transition = 'opacity 0.3s ease-out';
+              canvas.style.transform = 'translateZ(0) scale(0.1)';
               canvas.style.opacity = '0';
-              setTimeout(() => onClose(), 300);
-            }, 1000);
+              setTimeout(() => onClose(), 200);
+            }, 0);
           } else {
             setIsScalingDown(true);
             setTimeout(() => onClose(), 400);
@@ -442,8 +443,7 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
 
       <canvas
         ref={canvasRef}
-        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}`}
-        style={!isScalingDown && fromGrid ? { animation: 'none' } : undefined}
+        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}${!isScalingDown && fromGrid ? ' card-canvas--open-from-collect' : ''}`}
       />
 
       {showNavIcons && (

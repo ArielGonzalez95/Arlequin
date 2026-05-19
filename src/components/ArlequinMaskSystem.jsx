@@ -43,22 +43,22 @@ function ArlequinMaskSystem({
 }) {
   const [stage, setStage] = useState(STAGES.NONE);
   const [selectedCard, setSelectedCard] = useState(null);
-  // When the deal animation ends we keep CardDealAnimation mounted for an
-  // extra ~150 ms while GridStage paints in the same coordinates. Avoids
-  // the unmount→mount gap that produced a one-frame "cards disappear" flash
-  // on mobile Safari at the exact moment the text overlays became visible.
   const [dealLingerVisible, setDealLingerVisible] = useState(false);
   const dealLingerTimerRef = useRef(null);
-  // 'initial': normal deal with grow phase (logo → grid flow).
-  // 'fromCardClose': skip the grow phase — canvas has already faded out and
-  //   the deck should appear at center immediately, pause briefly, then deal.
   const [dealMode, setDealMode] = useState('initial');
   const [cardFromGrid, setCardFromGrid] = useState(false);
   const [isShrinkingOut, setIsShrinkingOut] = useState(false);
   const [preloadCard, setPreloadCard] = useState(null);
   const [isCardExpanding, setIsCardExpanding] = useState(false);
   const [dealKey, setDealKey] = useState(0);
-  // Use ref for tracking "NO" flow - more reliable than state
+  // 'close': collect → mask close (escudo click).
+  // 'openCard': collect → open card detail (grid card click).
+  const [collectPurpose, setCollectPurpose] = useState('close');
+  // Dorso bridge: small grid-card-sized dorso shown at center during the
+  // gap between close animation end and CDA deck becoming visible.
+  const [dorsoBridgeVisible, setDorsoBridgeVisible] = useState(false);
+  const [dorsoBridgeFading, setDorsoBridgeFading] = useState(false);
+  const dorsoBridgeTimerRef = useRef(null);
   const pendingCardStageRef = useRef(false);
 
   useEffect(() => {
@@ -132,6 +132,7 @@ function ArlequinMaskSystem({
 
   useEffect(() => () => {
     if (dealLingerTimerRef.current) clearTimeout(dealLingerTimerRef.current);
+    if (dorsoBridgeTimerRef.current) clearTimeout(dorsoBridgeTimerRef.current);
   }, []);
 
   // Handle NO click - close and reopen mask before showing card detail
@@ -149,12 +150,9 @@ function ArlequinMaskSystem({
     setStage(STAGES.GRID);
   }, []);
 
-  // Handle clicking on escudo. If the user is on the GRID, run the
-  // collect → shrink animation (reverse of CardDealAnimation) before
-  // triggering the mask close. From any other stage, fall back to the
-  // legacy mask-content shrink-out (there are no cards to gather).
   const handleEscudoClick = useCallback(() => {
     if (stage === STAGES.GRID) {
+      setCollectPurpose('close');
       setStage(STAGES.COLLECTING);
       return;
     }
@@ -165,25 +163,28 @@ function ArlequinMaskSystem({
     }, 380);
   }, [onReset, stage]);
 
-  // Called by CardCollectAnimation when the deck has fully gathered and
-  // shrunk to a tiny invisible point at center — that's the moment we hand
-  // off to the parent so the mask close animation runs over the empty stage.
   const handleCollectComplete = useCallback(() => {
-    if (onReset) onReset();
-  }, [onReset]);
+    if (collectPurpose === 'openCard') {
+      setPreloadCard(null);
+      setStage(STAGES.CARD_DETAIL);
+    } else {
+      if (onReset) onReset();
+    }
+  }, [collectPurpose, onReset]);
 
   // Handle grid card pre-click - preload images in background
   const handleGridCardPreClick = useCallback((cardIndex) => {
     setPreloadCard(cardIndex);
   }, []);
 
-  // Handle grid card click - show individual card
+  // Grid card click: run collect animation first, then open card detail.
   const handleGridCardClick = useCallback((cardIndex) => {
-    setPreloadCard(null);
+    setPreloadCard(cardIndex); // keep preloading during the ~830ms collect
     setSelectedCard(cardIndex);
     setCardFromGrid(true);
     setIsCardExpanding(false);
-    setStage(STAGES.CARD_DETAIL);
+    setCollectPurpose('openCard');
+    setStage(STAGES.COLLECTING);
   }, []);
 
   const handleCardExpandStart = useCallback(() => {
@@ -198,15 +199,30 @@ function ArlequinMaskSystem({
     setIsCardExpanding(true);
   }, []);
 
-  // Handle close from individual card detail.
-  // The canvas has already faded to opacity 0 (300ms transition) before
-  // this fires, so CDA mounts on a clean slate with no visual overlap.
   const handleCardDetailClose = useCallback(() => {
+    const wasFromGrid = cardFromGrid;
     setSelectedCard(null);
     setCardFromGrid(false);
-    setDealMode('fromCardClose');
+    setDealMode(wasFromGrid ? 'fromCardClose' : 'initial');
     setStage(STAGES.DEALING);
-  }, []);
+
+    if (wasFromGrid) {
+      // Show a grid-card-sized dorso at center to bridge the gap between
+      // the canvas disappearing and CDA's deck becoming visible (~200ms mount).
+      if (dorsoBridgeTimerRef.current) clearTimeout(dorsoBridgeTimerRef.current);
+      setDorsoBridgeVisible(true);
+      setDorsoBridgeFading(false);
+      // Start fading at 200ms, complete fade at 400ms — aligns with CDA
+      // starting its deal (~200ms after mount with skipGrow=true).
+      dorsoBridgeTimerRef.current = setTimeout(() => {
+        setDorsoBridgeFading(true);
+        dorsoBridgeTimerRef.current = setTimeout(() => {
+          setDorsoBridgeVisible(false);
+          setDorsoBridgeFading(false);
+        }, 200);
+      }, 200);
+    }
+  }, [cardFromGrid]);
 
   // Handle go-to-contact from CardQueEsArlequin last page
   const handleGoToContact = useCallback(() => {
@@ -306,7 +322,25 @@ function ArlequinMaskSystem({
             <CardCollectAnimation
               isDarkMode={isDarkMode}
               onCollectComplete={handleCollectComplete}
+              purpose={collectPurpose}
             />
+          )}
+          {/* Dorso bridge: covers the ~200ms gap between close animation end and
+              CDA deck appearing. Sized to match a grid card so the visual
+              transition from "close → small card at center → deal" is seamless. */}
+          {dorsoBridgeVisible && (
+            <div
+              className={`dorso-bridge${isDarkMode ? ' dark' : ''}`}
+              style={{
+                opacity: dorsoBridgeFading ? 0 : 1,
+                transition: dorsoBridgeFading ? 'opacity 0.2s ease-out' : 'none',
+              }}
+            >
+              <img
+                src={`/Cartas/00000_arlequin_dorso_${isDarkMode ? 'dark' : 'clear'}.avif`}
+                alt=""
+              />
+            </div>
           )}
           {renderStageContent()}
         </div>

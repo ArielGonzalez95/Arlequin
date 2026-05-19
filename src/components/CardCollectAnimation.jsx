@@ -5,15 +5,14 @@ const GATHER_DURATION = 420;
 const GATHER_STAGGER  = 120;
 const SHRINK_DURATION = 600;
 
-function CardCollectAnimation({ isDarkMode, onCollectComplete }) {
+// purpose='close'   : gather → shrink → onCollectComplete  (escudo → mask close)
+// purpose='openCard': gather → brief fade → onCollectComplete  (card click → open detail)
+function CardCollectAnimation({ isDarkMode, onCollectComplete, purpose = 'close' }) {
   const gridRef     = useRef(null);
   const themeSuffix = isDarkMode ? 'dark' : 'clear';
 
-  // half-step between cards in each axis — computed from the same layout used
-  // by GridStage so the cards visually start at exactly the grid positions
-  // they were at when the user clicked the escudo.
   const [offsets, setOffsets] = useState(null);
-  // idle → gathering → shrinking → done
+  // idle → gathering → (shrinking | gathered-open) → done
   const [phase, setPhase] = useState('idle');
 
   useLayoutEffect(() => {
@@ -30,19 +29,26 @@ function CardCollectAnimation({ isDarkMode, onCollectComplete }) {
     });
   }, []);
 
-  // Sequence: idle → gathering → shrinking → onCollectComplete
   useEffect(() => {
     if (!offsets) return;
     let raf1, raf2, t1, t2;
     raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => {
         setPhase('gathering');
-        // Last card finishes at GATHER_DURATION + 3 * STAGGER; small buffer
-        // before starting the shrink so the deck is fully formed.
-        t1 = setTimeout(() => {
-          setPhase('shrinking');
-          t2 = setTimeout(onCollectComplete, SHRINK_DURATION + 50);
-        }, GATHER_DURATION + GATHER_STAGGER * 3 + 50);
+        const afterGather = GATHER_DURATION + GATHER_STAGGER * 3 + 50;
+        if (purpose === 'openCard') {
+          // Just gather to center, then do a quick fade before handing off.
+          // No shrink needed — the card detail will grow from scale 0 at the same position.
+          t1 = setTimeout(() => {
+            setPhase('gathered-open');
+            t2 = setTimeout(onCollectComplete, 150);
+          }, afterGather);
+        } else {
+          t1 = setTimeout(() => {
+            setPhase('shrinking');
+            t2 = setTimeout(onCollectComplete, SHRINK_DURATION + 50);
+          }, afterGather);
+        }
       });
     });
     return () => {
@@ -51,7 +57,7 @@ function CardCollectAnimation({ isDarkMode, onCollectComplete }) {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [offsets, onCollectComplete]);
+  }, [offsets, onCollectComplete, purpose]);
 
   const getCardStyle = (index) => {
     if (!offsets) return { zIndex: 4 - index };
@@ -77,6 +83,16 @@ function CardCollectAnimation({ isDarkMode, onCollectComplete }) {
         transition: `transform ${GATHER_DURATION}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${(3 - index) * GATHER_STAGGER}ms`,
         zIndex: 4 - index,
         willChange: 'transform',
+      };
+    }
+
+    if (phase === 'gathered-open') {
+      // Brief opacity fade before the card detail grows in over the same position.
+      return {
+        transform: `translateX(${dx}px) translateY(${dy}px) scale(1)`,
+        opacity: 0,
+        transition: 'opacity 0.15s ease-out',
+        zIndex: 4 - index,
       };
     }
 

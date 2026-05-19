@@ -377,14 +377,15 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
         } else {
           {
             if (fromGrid) {
-              // Hold the dorso visible at center for 1s so the close
-              // animation clearly ends "the card came to rest", then fade
-              // out and hand off to CardDealAnimation.
+              // Quick scale-down + fade (200ms), then hand off to the
+              // dorso bridge in ArlequinMaskSystem which shows a
+              // grid-card-sized dorso before the deal animation starts.
+              canvas.style.transition = 'transform 0.2s ease-in, opacity 0.2s ease-in';
               setTimeout(() => {
-                canvas.style.transition = 'opacity 0.3s ease-out';
+                canvas.style.transform = 'translateZ(0) scale(0.1)';
                 canvas.style.opacity = '0';
-                setTimeout(() => onClose(), 300);
-              }, 1000);
+                setTimeout(() => onClose(), 200);
+              }, 0);
             } else {
               setIsScalingDown(true);
               setTimeout(() => onClose(), 400);
@@ -418,8 +419,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
 
       <canvas
         ref={canvasRef}
-        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}`}
-        style={!isScalingDown && fromGrid ? { animation: 'none' } : undefined}
+        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}${!isScalingDown && fromGrid ? ' card-canvas--open-from-collect' : ''}`}
       />
 
       {showNavIcons && (

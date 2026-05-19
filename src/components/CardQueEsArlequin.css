@@ -89,6 +89,17 @@
   animation: card-exit-scale 0.38s ease-in forwards !important;
 }
 
+/* Open animation when card is opened from the collect animation.
+   Starts at scale(0.5) ≈ grid-card size so the grow feels continuous. */
+.card-canvas--open-from-collect {
+  animation: card-canvas-from-collect 0.3s ease-out forwards !important;
+}
+
+@keyframes card-canvas-from-collect {
+  0%   { opacity: 0; transform: translateZ(0) scale(0.5); }
+  100% { opacity: 1; transform: translateZ(0) scale(1); }
+}
+
 @keyframes card-enter-scale {
   0% {
     opacity: 0;
