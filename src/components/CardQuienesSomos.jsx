@@ -372,9 +372,13 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
           animationRef.current = requestAnimationFrame(animate);
         } else {
           if (fromGrid) {
-            canvas.style.transition = 'opacity 0.3s ease-out';
-            canvas.style.opacity = '0';
-            setTimeout(() => onClose(), 300);
+            // Hold the dorso at center for 1s before fading and handing
+            // off to CardDealAnimation — clear sequential beat.
+            setTimeout(() => {
+              canvas.style.transition = 'opacity 0.3s ease-out';
+              canvas.style.opacity = '0';
+              setTimeout(() => onClose(), 300);
+            }, 1000);
           } else {
             setIsScalingDown(true);
             setTimeout(() => onClose(), 400);

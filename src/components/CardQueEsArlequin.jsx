@@ -377,11 +377,14 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
         } else {
           {
             if (fromGrid) {
-              // Fade canvas out, then fire onClose once it's invisible so CDA
-              // mounts on a clean slate — no overlap between the two animations.
-              canvas.style.transition = 'opacity 0.3s ease-out';
-              canvas.style.opacity = '0';
-              setTimeout(() => onClose(), 300);
+              // Hold the dorso visible at center for 1s so the close
+              // animation clearly ends "the card came to rest", then fade
+              // out and hand off to CardDealAnimation.
+              setTimeout(() => {
+                canvas.style.transition = 'opacity 0.3s ease-out';
+                canvas.style.opacity = '0';
+                setTimeout(() => onClose(), 300);
+              }, 1000);
             } else {
               setIsScalingDown(true);
               setTimeout(() => onClose(), 400);

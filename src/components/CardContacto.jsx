@@ -304,9 +304,11 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
           if (animPhase === 'postSend') { setAnimPhase('fixedGracias'); setShowGracias(true); }
           if (animPhase === 'closing')  {
             if (fromGrid) {
-              canvas.style.transition = 'opacity 0.3s ease-out';
-              canvas.style.opacity = '0';
-              setTimeout(() => onClose(), 300);
+              setTimeout(() => {
+                canvas.style.transition = 'opacity 0.3s ease-out';
+                canvas.style.opacity = '0';
+                setTimeout(() => onClose(), 300);
+              }, 1000);
             } else {
               setIsScalingDown(true);
               setTimeout(() => onClose(), 400);
