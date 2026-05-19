@@ -407,7 +407,7 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
           if (fromGrid) {
             canvas.style.transition = 'opacity 0.3s ease-out';
             canvas.style.opacity = '0';
-            onClose();
+            setTimeout(() => onClose(), 300);
           } else {
             setIsScalingDown(true);
             setTimeout(() => onClose(), 400);

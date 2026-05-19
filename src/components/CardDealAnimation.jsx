@@ -45,13 +45,15 @@ function CardDealAnimation({ isDarkMode, onDealComplete, skipGrow = false }) {
     let raf1, raf2, t1, t2;
 
     if (skipGrow) {
-      // 2 RAFs so the painted "growing-end" frame is visible before the
-      // dealing transition starts (otherwise the browser may collapse the
-      // two state changes into the same paint and the cards skip the deck).
+      // 2 RAFs to paint the "growing-end" frame (deck at center), then a
+      // 200 ms pause so the user sees the deck before the cards spread out.
+      // This creates the "carta en el centro → reparto" beat the user wanted.
       raf1 = requestAnimationFrame(() => {
         raf2 = requestAnimationFrame(() => {
-          setPhase('dealing');
-          t2 = setTimeout(onDealComplete, FLY_DURATION + FLY_STAGGER * 3 + 80);
+          t1 = setTimeout(() => {
+            setPhase('dealing');
+            t2 = setTimeout(onDealComplete, FLY_DURATION + FLY_STAGGER * 3 + 80);
+          }, 200);
         });
       });
     } else {

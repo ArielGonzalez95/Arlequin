@@ -49,15 +49,9 @@ function ArlequinMaskSystem({
   // on mobile Safari at the exact moment the text overlays became visible.
   const [dealLingerVisible, setDealLingerVisible] = useState(false);
   const dealLingerTimerRef = useRef(null);
-  // Linger the card-detail component in DOM after its close animation fires
-  // onClose() — keeps it mounted (fading canvas) while CardDealAnimation mounts
-  // behind it, eliminating the blank-frame gap between the two stages.
-  const [cardDetailLinger, setCardDetailLinger] = useState(false);
-  const lingerCardRef = useRef(null);
-  const cardDetailLingerTimerRef = useRef(null);
   // 'initial': normal deal with grow phase (logo → grid flow).
-  // 'fromCardClose': skip the grow phase — the card canvas is fading out and
-  //   the deck should be at full center size immediately to take its place.
+  // 'fromCardClose': skip the grow phase — canvas has already faded out and
+  //   the deck should appear at center immediately, pause briefly, then deal.
   const [dealMode, setDealMode] = useState('initial');
   const [cardFromGrid, setCardFromGrid] = useState(false);
   const [isShrinkingOut, setIsShrinkingOut] = useState(false);
@@ -92,9 +86,6 @@ function ArlequinMaskSystem({
     if (phase === 'home' || phase === 'logoGrowing' || phase === 'reverseClosing' || phase === 'reverseOpening') {
       setStage(STAGES.NONE);
       setSelectedCard(null);
-      setCardDetailLinger(false);
-      lingerCardRef.current = null;
-      if (cardDetailLingerTimerRef.current) { clearTimeout(cardDetailLingerTimerRef.current); cardDetailLingerTimerRef.current = null; }
       pendingCardStageRef.current = false;
       return;
     }
@@ -109,8 +100,6 @@ function ArlequinMaskSystem({
     if (phase === 'logoShrinking' || phase === 'maskClosing' || phase === 'maskOpening') {
       setStage(STAGES.NONE);
       setSelectedCard(null);
-      setCardDetailLinger(false);
-      lingerCardRef.current = null;
     }
   }, [phase, stage]);
 
@@ -143,7 +132,6 @@ function ArlequinMaskSystem({
 
   useEffect(() => () => {
     if (dealLingerTimerRef.current) clearTimeout(dealLingerTimerRef.current);
-    if (cardDetailLingerTimerRef.current) clearTimeout(cardDetailLingerTimerRef.current);
   }, []);
 
   // Handle NO click - close and reopen mask before showing card detail
@@ -211,24 +199,14 @@ function ArlequinMaskSystem({
   }, []);
 
   // Handle close from individual card detail.
-  // The card's canvas has already faded to opacity 0 when this fires.
-  // We keep the card component in the DOM (linger) for 400 ms so that
-  // CardDealAnimation can mount and paint *behind* the invisible canvas
-  // before the card unmounts — eliminates the blank-frame gap.
+  // The canvas has already faded to opacity 0 (300ms transition) before
+  // this fires, so CDA mounts on a clean slate with no visual overlap.
   const handleCardDetailClose = useCallback(() => {
-    lingerCardRef.current = selectedCard;
-    setCardDetailLinger(true);
     setSelectedCard(null);
     setCardFromGrid(false);
     setDealMode('fromCardClose');
     setStage(STAGES.DEALING);
-    if (cardDetailLingerTimerRef.current) clearTimeout(cardDetailLingerTimerRef.current);
-    cardDetailLingerTimerRef.current = setTimeout(() => {
-      setCardDetailLinger(false);
-      lingerCardRef.current = null;
-      cardDetailLingerTimerRef.current = null;
-    }, 400);
-  }, [selectedCard]);
+  }, []);
 
   // Handle go-to-contact from CardQueEsArlequin last page
   const handleGoToContact = useCallback(() => {
@@ -239,41 +217,6 @@ function ArlequinMaskSystem({
 
   // Render current stage content
   const renderStageContent = () => {
-    // Active card detail
-    if (stage === STAGES.CARD_DETAIL && selectedCard !== null) {
-      const CardComponent = CARD_COMPONENTS[selectedCard];
-      if (CardComponent) {
-        return (
-          <CardComponent
-            isDarkMode={isDarkMode}
-            onClose={handleCardDetailClose}
-            onCloseStart={handleCardDetailCloseStart}
-            fromGrid={cardFromGrid}
-            isLowEnd={isLowEnd}
-            prefersReducedMotion={prefersReducedMotion}
-          />
-        );
-      }
-    }
-
-    // Post-close linger: keep the card in the DOM (its canvas is already
-    // opacity:0) while CardDealAnimation mounts and paints behind it.
-    if (cardDetailLinger && lingerCardRef.current !== null) {
-      const CardComponent = CARD_COMPONENTS[lingerCardRef.current];
-      if (CardComponent) {
-        return (
-          <CardComponent
-            isDarkMode={isDarkMode}
-            onClose={handleCardDetailClose}
-            onCloseStart={handleCardDetailCloseStart}
-            fromGrid={cardFromGrid}
-            isLowEnd={isLowEnd}
-            prefersReducedMotion={prefersReducedMotion}
-          />
-        );
-      }
-    }
-
     switch (stage) {
       case STAGES.QUESTION:
         return (
@@ -290,6 +233,22 @@ function ArlequinMaskSystem({
             isDarkMode={isDarkMode}
           />
         );
+      case STAGES.CARD_DETAIL: {
+        const CardComponent = CARD_COMPONENTS[selectedCard];
+        if (CardComponent) {
+          return (
+            <CardComponent
+              isDarkMode={isDarkMode}
+              onClose={handleCardDetailClose}
+              onCloseStart={handleCardDetailCloseStart}
+              fromGrid={cardFromGrid}
+              isLowEnd={isLowEnd}
+              prefersReducedMotion={prefersReducedMotion}
+            />
+          );
+        }
+        return null;
+      }
       default:
         return null;
     }

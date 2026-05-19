@@ -372,12 +372,9 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
           animationRef.current = requestAnimationFrame(animate);
         } else {
           if (fromGrid) {
-            // Fade canvas out and fire onClose immediately — the parent keeps
-            // this component in the DOM (linger) while CardDealAnimation mounts
-            // behind it, so the deal starts under the fading canvas with no gap.
             canvas.style.transition = 'opacity 0.3s ease-out';
             canvas.style.opacity = '0';
-            onClose();
+            setTimeout(() => onClose(), 300);
           } else {
             setIsScalingDown(true);
             setTimeout(() => onClose(), 400);
