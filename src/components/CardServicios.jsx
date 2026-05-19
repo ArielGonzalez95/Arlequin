@@ -405,11 +405,9 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
           animationRef.current = requestAnimationFrame(animate);
         } else {
           if (fromGrid) {
-            // Stay visible at center as a dorso roughly the size of a grid
-            // card; CardDealAnimation picks up from there with skipGrow.
-            canvas.style.transition = 'transform 0.3s ease-in';
-            canvas.style.transform = 'scale(0.5)';
-            setTimeout(() => onClose(), 300);
+            canvas.style.transition = 'opacity 0.3s ease-out';
+            canvas.style.opacity = '0';
+            onClose();
           } else {
             setIsScalingDown(true);
             setTimeout(() => onClose(), 400);
