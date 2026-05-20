@@ -291,11 +291,14 @@
   }
 }
 
-/* 651–720px tall (1229×692 notebook target): escudo ends y=96 (8+88).
-   At h=692 scale 0.72 → card top y=101, clears escudo 5px, footer 38px. */
+/* 651–720px tall (1229×692 notebook target): escudo ends y=99 (8+91).
+   At h=692 scale 0.80: close-btn icon top y=110 (clears escudo 11px),
+   visible card image top y=165, canvas bottom y=618 (clears footer 11px).
+   The canvas BOX (450×680) does extend above the escudo line but that
+   strip is transparent padding in the AVIF — visually invisible. */
 @media (max-height: 720px) and (min-width: 501px) {
   .card-que-es-arlequin {
-    transform: scale(0.72);
+    transform: scale(0.80);
     transform-origin: center center;
   }
 }

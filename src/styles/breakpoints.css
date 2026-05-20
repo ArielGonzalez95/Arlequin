@@ -102,10 +102,10 @@
 /* ── Notebook 1229×692 (1536×864 @125%) and similar ≤720px tall ──────── */
 @media (max-height: 720px) and (min-width: 431px) {
   :root {
-    --escudo-height:     60px;
-    --escudo-img-height:  88px;        /* 60 × 1.4677 */
+    --escudo-height:     62px;
+    --escudo-img-height:  91px;        /* 62 × 1.4677 */
     --escudo-top:         8px;
-    --escudo-clearance: 116px;         /* 8 + 88 + 20 */
+    --escudo-clearance: 119px;         /* 8 + 91 + 20 */
     --footer-clearance:  66px;
   }
 }
