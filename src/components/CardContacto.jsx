@@ -69,6 +69,16 @@ const _postSendCache = {};
 const _closeCache    = {};
 const _btnCache      = {};
 
+const drawCardFrame = (ctx, frame, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  if (!frame) return;
+  if (frame.naturalWidth >= 1000) {
+    ctx.drawImage(frame, 166, 234, 668, 932, 0, 0, w, h);
+  } else {
+    ctx.drawImage(frame, 0, 0, w, h);
+  }
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false, isLowEnd = false, prefersReducedMotion = false }) {
   const canvasRef         = useRef(null);
@@ -252,7 +262,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     canvas.style.height = `${CARD_HEIGHT}px`;
     ctx.scale(dpr, dpr);
     const first = openImagesRef.current[0];
-    if (first) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(first, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+    if (first) drawCardFrame(ctx, first, CARD_WIDTH, CARD_HEIGHT);
   }, [isLoaded]);
 
   // ── Main animation loop ──────────────────────────────────────────────────────
@@ -273,7 +283,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     canvas.style.transform = '';
 
     // Draw first frame immediately
-    if (frames[0]) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frames[0], 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+    if (frames[0]) drawCardFrame(ctx, frames[0], CARD_WIDTH, CARD_HEIGHT);
 
     const handleVisibility = () => {
       if (!document.hidden) lastTimeRef.current = 0;
@@ -290,10 +300,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
         lastTimeRef.current = timestamp;
         const idx = frameIdxRef.current;
         const img = frames[idx];
-        if (img) {
-          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-          ctx.drawImage(img, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-        }
+        if (img) drawCardFrame(ctx, img, CARD_WIDTH, CARD_HEIGHT);
 
         if (idx < frames.length - 1) {
           frameIdxRef.current++;

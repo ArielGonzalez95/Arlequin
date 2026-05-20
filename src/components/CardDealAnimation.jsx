@@ -46,14 +46,16 @@ function CardDealAnimation({ isDarkMode, onDealComplete, skipGrow = false }) {
 
     if (skipGrow) {
       // 2 RAFs to paint the "growing-end" frame (deck at center), then a
-      // 200 ms pause so the user sees the deck before the cards spread out.
-      // This creates the "carta en el centro → reparto" beat the user wanted.
+      // pause before dealing out. The pause must be long enough that the
+      // dorso bridge in ArlequinMaskSystem has faded out (bridge hold=200ms +
+      // fade=200ms = 400ms total), so both transitions end simultaneously and
+      // the user sees a single smooth handoff rather than two overlapping animations.
       raf1 = requestAnimationFrame(() => {
         raf2 = requestAnimationFrame(() => {
           t1 = setTimeout(() => {
             setPhase('dealing');
             t2 = setTimeout(onDealComplete, FLY_DURATION + FLY_STAGGER * 3 + 80);
-          }, 200);
+          }, 420);
         });
       });
     } else {
