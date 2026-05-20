@@ -107,7 +107,7 @@
     --escudo-top:         8px;
     --escudo-clearance: 138px;         /* 8 + 110 + 20 */
     --footer-clearance:  66px;
-    --mask-open-distance: 260px;
+    --mask-open-distance: 180px;
   }
 }
 
