@@ -411,8 +411,8 @@ function LogoAnimation({
           lastCuerpoMascaraTimeRef.current = timestamp;
         }
 
-        // Advance estrellas only during active states
-        if (!resetStars && (state === ANIMATION_STATE.OPENING || state === ANIMATION_STATE.OPEN || state === ANIMATION_STATE.CLOSING)) {
+        // Advance estrellas only while opening/open; freeze on close (matches mobile behaviour)
+        if (!resetStars && (state === ANIMATION_STATE.OPENING || state === ANIMATION_STATE.OPEN)) {
           const starElapsed = timestamp - lastEstrellasTimeRef.current;
           if (starElapsed >= ESTRELLAS_FRAME_DURATION) {
             if (starElapsed > ESTRELLAS_FRAME_DURATION * 4) {
