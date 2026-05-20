@@ -182,14 +182,14 @@
 @media (max-height: 720px) and (min-width: 501px) {
   .grid-stage {
     padding: 6px;
-    padding-top: var(--escudo-clearance, 136px);
+    padding-top: var(--escudo-clearance, 138px);
     padding-bottom: var(--footer-clearance, 66px);
   }
   .cards-grid {
-    max-width: 330px;
+    max-width: 363px;
   }
   .card-text-overlay {
-    font-size: 15px;
+    font-size: 16px;
     -webkit-text-stroke: 0;
   }
 }
