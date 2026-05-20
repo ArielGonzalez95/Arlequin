@@ -115,17 +115,17 @@ function ArlequinMaskSystem({
     // CardDealAnimation, then drop the linger flag after a couple of frames.
     setStage(STAGES.GRID);
     setDealLingerVisible(true);
-    // Reset the deal mode now that the deal is complete — the next deal (if
-    // user re-opens & closes a card) will need to set it again from
-    // handleCardDetailClose if applicable. Resetting here keeps the state
-    // honest for any future open-from-logo path.
-    setDealMode('initial');
+    // Do NOT reset dealMode here. CDA's useEffect depends on the skipGrow prop
+    // (derived from dealMode='fromCardClose'). Changing dealMode while CDA is
+    // still mounted flips skipGrow true→false, which re-triggers CDA's grow→deal
+    // animation — causing the visible "cards shuffle toward center" double-animation.
+    // Reset dealMode inside the timer so it fires in the same React batch as
+    // setDealLingerVisible(false), unmounting CDA before the prop can change.
     if (dealLingerTimerRef.current) clearTimeout(dealLingerTimerRef.current);
     dealLingerTimerRef.current = setTimeout(() => {
       setDealLingerVisible(false);
-      // Restore escudo visibility AFTER the swap is done so its scale
-      // transition doesn't compound with the card swap in the same frame.
       setIsCardExpanding(false);
+      setDealMode('initial');
       dealLingerTimerRef.current = null;
     }, 150);
   }, []);

@@ -84,11 +84,25 @@ const getDpr = () => Math.min(
 const _openCache  = {};
 const _closeCache = {};
 
-// Consolidates clearRect + drawImage so call sites stay one-liners.
+// Animation frames use a 1000×1400 container (56% padding); the dorso grid
+// frame uses 684×950 (4% padding). Both contain identical visible content
+// (668×932). Without correction, the dorso appears ~97% of canvas width while
+// animation frames appear ~67% — a visible size jump at the flip boundary.
+// Fix: for the dorso frame (naturalWidth < 1000), clip its visible content and
+// place it at the same canvas coordinates as the animation-frame visible region.
 const drawCardFrame = (ctx, frame, w, h) => {
   ctx.clearRect(0, 0, w, h);
   if (!frame) return;
-  ctx.drawImage(frame, 0, 0, w, h);
+  if (frame.naturalWidth >= 1000) {
+    ctx.drawImage(frame, 0, 0, w, h);
+  } else {
+    // Dorso: src visible region = (8,9,668×932). Place it where animation
+    // frames' visible content lands: offset (166/1000·w, 234/1400·h),
+    // size (668/1000·w, 932/1400·h).
+    ctx.drawImage(frame, 8, 9, 668, 932,
+      166 / 1000 * w, 234 / 1400 * h,
+      668 / 1000 * w, 932 / 1400 * h);
+  }
 };
 
 const cardTexts = [
