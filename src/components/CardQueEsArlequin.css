@@ -292,10 +292,10 @@
 }
 
 /* 651–720px tall (1229×692 notebook target): escudo ends y=96 (8+88).
-   At h=692 scale 0.68 → card top y=115, clears escudo by 19px, footer by 39px. */
+   At h=692 scale 0.72 → card top y=101, clears escudo 5px, footer 38px. */
 @media (max-height: 720px) and (min-width: 501px) {
   .card-que-es-arlequin {
-    transform: scale(0.68);
+    transform: scale(0.72);
     transform-origin: center center;
   }
 }
