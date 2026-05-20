@@ -153,50 +153,12 @@ function GridStage({ onCardClick, onCardPreClick, onExpandStart, onDealComplete,
 
   const handleCardClick = (index) => {
     if (clickPhase !== 'idle' || dealPhase !== 'idle') return;
-
-    // Measure selected card position to calculate translation to viewport center
-    const cards = gridRef.current.querySelectorAll('.grid-card');
-    const cardEl = cards[index];
-    const rect = cardEl.getBoundingClientRect();
-    const cardCenterX = rect.left + rect.width / 2;
-    const cardCenterY = rect.top + rect.height / 2;
-    const vpCenterX = window.innerWidth / 2;
-    const vpCenterY = window.innerHeight / 2;
-
-    const tx = vpCenterX - cardCenterX;
-    const ty = vpCenterY - cardCenterY;
-
-    // Scale for the OPEN animation: card expands to 390px (desktop) / 85vw (mobile)
-    const expandTargetWidth = window.innerWidth <= 500 ? window.innerWidth * 0.85 : 390;
-    const scaleToComponent = expandTargetWidth / rect.width;
-
-    // Scale for the RESTORING snap: 1:1 so the card snaps to its natural grid size.
-    // Canvas now matches grid card dimensions, so no expansion needed.
-    const restoreScale = 1;
-
-    const expandTransformVal = { tx, ty, scale: scaleToComponent };
-    const restoreTransformVal = { tx, ty, scale: restoreScale };
-
-    // Store for reverse (close) animation
-    lastSelectedRef.current = index;
-    lastExpandRef.current = expandTransformVal;
-    lastRestoreRef.current = restoreTransformVal;
-
+    // ArlequinMaskSystem now runs CardCollectAnimation when a card is clicked,
+    // so GridStage no longer needs its own stack+expand timeline (that was
+    // causing a double-animation: stack+expand here, then collect in AMS).
+    // Hand off immediately.
     if (onCardPreClick) onCardPreClick(index + 1);
-    if (onExpandStart) onExpandStart();
-
-    setSelectedCard(index);
-    setExpandTransform(expandTransformVal);
-    setClickPhase('stacking');
-
-    // After all cards stack, expand selected to center at component size
-    setTimeout(() => {
-      setClickPhase('expanding');
-      setTimeout(() => {
-        setClickPhase('complete');
-        onCardClick(index + 1);
-      }, 140);
-    }, 350);
+    onCardClick(index + 1);
   };
 
   const getCardStyle = (index) => {

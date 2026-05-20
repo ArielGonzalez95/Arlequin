@@ -82,6 +82,18 @@ const getDpr = () => Math.min(
 const _openCache  = {};
 const _closeCache = {};
 
+const drawCardFrame = (ctx, frame, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  if (!frame) return;
+  if (frame.naturalWidth >= 1000) {
+    ctx.drawImage(frame, 0, 0, w, h);
+  } else {
+    ctx.drawImage(frame, 8, 9, 668, 932,
+      166 / 1000 * w, 234 / 1400 * h,
+      668 / 1000 * w, 932 / 1400 * h);
+  }
+};
+
 // ── 7 páginas de contenido ────────────────────────────────────────
 const page1Lines = [
   { text: 'Landing Page', diamond: true },
@@ -233,10 +245,7 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
           const canvas = canvasRef.current;
           const ctx = canvas.getContext('2d');
           const finalFrame = _openCache[themeKey][_openCache[themeKey].length - 1];
-          if (finalFrame) {
-            ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-            ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-          }
+          if (finalFrame) drawCardFrame(ctx, finalFrame, CARD_WIDTH, CARD_HEIGHT);
         }
         return;
       }
@@ -274,10 +283,7 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const finalFrame = openResults[openResults.length - 1];
-        if (finalFrame) {
-          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-          ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-        }
+        if (finalFrame) drawCardFrame(ctx, finalFrame, CARD_WIDTH, CARD_HEIGHT);
       }
     };
     loadImages();
@@ -295,7 +301,7 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
     canvas.style.height = `${CARD_HEIGHT}px`;
     ctx.scale(dpr, dpr);
     const first = imagesRef.current[0];
-    if (first) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(first, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+    if (first) drawCardFrame(ctx, first, CARD_WIDTH, CARD_HEIGHT);
   }, [isLoaded]);
 
   // Open animation loop
@@ -314,12 +320,12 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
     const drawFrame = () => {
       if (isCompleteRef.current) {
         const final = imagesRef.current[totalFrames];
-        if (final) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(final, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+        if (final) drawCardFrame(ctx, final, CARD_WIDTH, CARD_HEIGHT);
         if (!isClosing) setShowNavIcons(true);
         return;
       }
       const frame = imagesRef.current[currentFrameRef.current];
-      if (frame) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+      if (frame) drawCardFrame(ctx, frame, CARD_WIDTH, CARD_HEIGHT);
     };
 
     drawFrame();
@@ -395,24 +401,14 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
         lastCloseFrameTimeRef.current = timestamp;
 
         const frame = frames[closeFrameRef.current];
-        if (frame) {
-          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-          ctx.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-        }
+        if (frame) drawCardFrame(ctx, frame, CARD_WIDTH, CARD_HEIGHT);
 
         if (closeFrameRef.current < frames.length - 1) {
           closeFrameRef.current++;
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          if (fromGrid) {
-            canvas.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
-            canvas.style.transform = 'scale(0.05)';
-            canvas.style.opacity = '0';
-            setTimeout(() => onClose(), 350);
-          } else {
-            setIsScalingDown(true);
-            setTimeout(() => onClose(), 400);
-          }
+          setIsScalingDown(true);
+          setTimeout(() => onClose(), 400);
         }
       } else {
         animationRef.current = requestAnimationFrame(animate);
@@ -441,8 +437,7 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
 
       <canvas
         ref={canvasRef}
-        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}`}
-        style={!isScalingDown && fromGrid ? { animation: 'none' } : undefined}
+        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}${!isScalingDown && fromGrid ? ' card-canvas--open-from-collect' : ''}`}
       />
 
       {showNavIcons && (

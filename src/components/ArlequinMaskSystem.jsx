@@ -5,6 +5,7 @@ import QuestionStage from './QuestionStage';
 import CardStage from './CardStage';
 import GridStage from './GridStage';
 import CardDealAnimation from './CardDealAnimation';
+import CardCollectAnimation from './CardCollectAnimation';
 import CardQueEsArlequin from './CardQueEsArlequin';
 import CardQuienesSomos from './CardQuienesSomos';
 import CardServicios from './CardServicios';
@@ -17,9 +18,10 @@ const STAGES = {
   MASK_SHOWING: 'mask_showing',
   QUESTION: 'question',
   CARD: 'card',
-  DEALING: 'dealing',   // CardDealAnimation phase before grid is stable
+  DEALING: 'dealing',       // CardDealAnimation phase before grid is stable
   GRID: 'grid',
-  CARD_DETAIL: 'card_detail'
+  CARD_DETAIL: 'card_detail',
+  COLLECTING: 'collecting'  // CardCollectAnimation runs before mask closes back to home
 };
 
 // Map card index to component
@@ -41,18 +43,17 @@ function ArlequinMaskSystem({
 }) {
   const [stage, setStage] = useState(STAGES.NONE);
   const [selectedCard, setSelectedCard] = useState(null);
-  // When the deal animation ends we keep CardDealAnimation mounted for an
-  // extra ~150 ms while GridStage paints in the same coordinates. Avoids
-  // the unmount→mount gap that produced a one-frame "cards disappear" flash
-  // on mobile Safari at the exact moment the text overlays became visible.
   const [dealLingerVisible, setDealLingerVisible] = useState(false);
   const dealLingerTimerRef = useRef(null);
+  const [dealMode, setDealMode] = useState('initial');
   const [cardFromGrid, setCardFromGrid] = useState(false);
   const [isShrinkingOut, setIsShrinkingOut] = useState(false);
   const [preloadCard, setPreloadCard] = useState(null);
   const [isCardExpanding, setIsCardExpanding] = useState(false);
   const [dealKey, setDealKey] = useState(0);
-  // Use ref for tracking "NO" flow - more reliable than state
+  // 'close': collect → mask close (escudo click).
+  // 'openCard': collect → open card detail (grid card click).
+  const [collectPurpose, setCollectPurpose] = useState('close');
   const pendingCardStageRef = useRef(false);
 
   useEffect(() => {
@@ -109,12 +110,17 @@ function ArlequinMaskSystem({
     // CardDealAnimation, then drop the linger flag after a couple of frames.
     setStage(STAGES.GRID);
     setDealLingerVisible(true);
+    // Do NOT reset dealMode here. CDA's useEffect depends on the skipGrow prop
+    // (derived from dealMode='fromCardClose'). Changing dealMode while CDA is
+    // still mounted flips skipGrow true→false, which re-triggers CDA's grow→deal
+    // animation — causing the visible "cards shuffle toward center" double-animation.
+    // Reset dealMode inside the timer so it fires in the same React batch as
+    // setDealLingerVisible(false), unmounting CDA before the prop can change.
     if (dealLingerTimerRef.current) clearTimeout(dealLingerTimerRef.current);
     dealLingerTimerRef.current = setTimeout(() => {
       setDealLingerVisible(false);
-      // Restore escudo visibility AFTER the swap is done so its scale
-      // transition doesn't compound with the card swap in the same frame.
       setIsCardExpanding(false);
+      setDealMode('initial');
       dealLingerTimerRef.current = null;
     }, 150);
   }, []);
@@ -138,27 +144,41 @@ function ArlequinMaskSystem({
     setStage(STAGES.GRID);
   }, []);
 
-  // Handle clicking on escudo - shrink content out first, then start reverse animation
   const handleEscudoClick = useCallback(() => {
+    if (stage === STAGES.GRID) {
+      setCollectPurpose('close');
+      setStage(STAGES.COLLECTING);
+      return;
+    }
     setIsShrinkingOut(true);
     setTimeout(() => {
       setIsShrinkingOut(false);
       if (onReset) onReset();
     }, 380);
-  }, [onReset]);
+  }, [onReset, stage]);
+
+  const handleCollectComplete = useCallback(() => {
+    if (collectPurpose === 'openCard') {
+      setPreloadCard(null);
+      setStage(STAGES.CARD_DETAIL);
+    } else {
+      if (onReset) onReset();
+    }
+  }, [collectPurpose, onReset]);
 
   // Handle grid card pre-click - preload images in background
   const handleGridCardPreClick = useCallback((cardIndex) => {
     setPreloadCard(cardIndex);
   }, []);
 
-  // Handle grid card click - show individual card
+  // Grid card click: run collect animation first, then open card detail.
   const handleGridCardClick = useCallback((cardIndex) => {
-    setPreloadCard(null);
+    setPreloadCard(cardIndex); // keep preloading during the ~830ms collect
     setSelectedCard(cardIndex);
     setCardFromGrid(true);
     setIsCardExpanding(false);
-    setStage(STAGES.CARD_DETAIL);
+    setCollectPurpose('openCard');
+    setStage(STAGES.COLLECTING);
   }, []);
 
   const handleCardExpandStart = useCallback(() => {
@@ -173,13 +193,16 @@ function ArlequinMaskSystem({
     setIsCardExpanding(true);
   }, []);
 
-  // Handle close from individual card detail — re-run deal animation instead of
-  // reverse-deal in GridStage, which avoids the size jump from canvas padding mismatch.
   const handleCardDetailClose = useCallback(() => {
+    const wasFromGrid = cardFromGrid;
     setSelectedCard(null);
     setCardFromGrid(false);
+    setDealMode(wasFromGrid ? 'fromCardClose' : 'initial');
     setStage(STAGES.DEALING);
-  }, []);
+    // No bridge needed: the canvas now exits via card-exit-scale (380ms) which
+    // shrinks to ~grid-card size before onClose fires, so CDA mounts at the
+    // same apparent size — seamless hand-off without a visible size jump.
+  }, [cardFromGrid]);
 
   // Handle go-to-contact from CardQueEsArlequin last page
   const handleGoToContact = useCallback(() => {
@@ -262,6 +285,7 @@ function ArlequinMaskSystem({
             <CardDealAnimation
               isDarkMode={isDarkMode}
               onDealComplete={handleDealAnimationComplete}
+              skipGrow={dealMode === 'fromCardClose'}
             />
           )}
           {stage === STAGES.GRID && (
@@ -272,6 +296,13 @@ function ArlequinMaskSystem({
               onDealComplete={handleDealComplete}
               isDarkMode={isDarkMode}
               dealKey={dealKey}
+            />
+          )}
+          {stage === STAGES.COLLECTING && (
+            <CardCollectAnimation
+              isDarkMode={isDarkMode}
+              onCollectComplete={handleCollectComplete}
+              purpose={collectPurpose}
             />
           )}
           {renderStageContent()}

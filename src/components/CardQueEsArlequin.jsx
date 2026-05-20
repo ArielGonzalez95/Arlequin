@@ -84,6 +84,27 @@ const getDpr = () => Math.min(
 const _openCache  = {};
 const _closeCache = {};
 
+// Animation frames use a 1000×1400 container (56% padding); the dorso grid
+// frame uses 684×950 (4% padding). Both contain identical visible content
+// (668×932). Without correction, the dorso appears ~97% of canvas width while
+// animation frames appear ~67% — a visible size jump at the flip boundary.
+// Fix: for the dorso frame (naturalWidth < 1000), clip its visible content and
+// place it at the same canvas coordinates as the animation-frame visible region.
+const drawCardFrame = (ctx, frame, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  if (!frame) return;
+  if (frame.naturalWidth >= 1000) {
+    ctx.drawImage(frame, 0, 0, w, h);
+  } else {
+    // Dorso: src visible region = (8,9,668×932). Place it where animation
+    // frames' visible content lands: offset (166/1000·w, 234/1400·h),
+    // size (668/1000·w, 932/1400·h).
+    ctx.drawImage(frame, 8, 9, 668, 932,
+      166 / 1000 * w, 234 / 1400 * h,
+      668 / 1000 * w, 932 / 1400 * h);
+  }
+};
+
 const cardTexts = [
   [
     'Arlequín es una empresa enfocada en el diseño y desarrollo de soluciones digitales creativas.',
@@ -191,10 +212,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
           const canvas = canvasRef.current;
           const ctx = canvas.getContext('2d');
           const finalFrame = _openCache[themeKey][_openCache[themeKey].length - 1];
-          if (finalFrame) {
-            ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-            ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-          }
+          if (finalFrame) drawCardFrame(ctx, finalFrame, CARD_WIDTH, CARD_HEIGHT);
         }
         return;
       }
@@ -234,10 +252,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const finalFrame = openResults[openResults.length - 1];
-        if (finalFrame) {
-          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-          ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-        }
+        if (finalFrame) drawCardFrame(ctx, finalFrame, CARD_WIDTH, CARD_HEIGHT);
       }
     };
 
@@ -256,10 +271,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
     canvas.style.height = `${CARD_HEIGHT}px`;
     ctx.scale(dpr, dpr);
     const firstFrame = imagesRef.current[0];
-    if (firstFrame) {
-      ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-      ctx.drawImage(firstFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-    }
+    if (firstFrame) drawCardFrame(ctx, firstFrame, CARD_WIDTH, CARD_HEIGHT);
   }, [isLoaded]);
 
   // Open animation loop
@@ -278,18 +290,12 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
     const drawFrame = () => {
       if (isCompleteRef.current) {
         const finalFrame = imagesRef.current[totalFrames];
-        if (finalFrame) {
-          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-          ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-        }
+        if (finalFrame) drawCardFrame(ctx, finalFrame, CARD_WIDTH, CARD_HEIGHT);
         if (!isClosing) setShowNavIcons(true);
         return;
       }
       const frame = imagesRef.current[currentFrameRef.current];
-      if (frame) {
-        ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-        ctx.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-      }
+      if (frame) drawCardFrame(ctx, frame, CARD_WIDTH, CARD_HEIGHT);
     };
 
     drawFrame();
@@ -366,26 +372,17 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
         lastCloseFrameTimeRef.current = timestamp;
 
         const frame = frames[closeFrameRef.current];
-        if (frame) {
-          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-          ctx.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-        }
+        if (frame) drawCardFrame(ctx, frame, CARD_WIDTH, CARD_HEIGHT);
 
         if (closeFrameRef.current < frames.length - 1) {
           closeFrameRef.current++;
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          {
-            if (fromGrid) {
-              canvas.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
-              canvas.style.transform = 'scale(0.05)';
-              canvas.style.opacity = '0';
-              setTimeout(() => onClose(), 350);
-            } else {
-              setIsScalingDown(true);
-              setTimeout(() => onClose(), 400);
-            }
-          }
+          // card-exit-scale (380ms) shrinks to ~0.49 of canvas CSS size ≈ grid
+          // card size, then fades. CDA mounts at the same apparent size so the
+          // hand-off is seamless with no visible size jump.
+          setIsScalingDown(true);
+          setTimeout(() => onClose(), 400);
         }
       } else {
         animationRef.current = requestAnimationFrame(animate);
@@ -414,8 +411,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
 
       <canvas
         ref={canvasRef}
-        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}`}
-        style={!isScalingDown && fromGrid ? { animation: 'none' } : undefined}
+        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}${!isScalingDown && fromGrid ? ' card-canvas--open-from-collect' : ''}`}
       />
 
       {showNavIcons && (

@@ -77,6 +77,18 @@ const CARD_HEIGHT = 680;
 const _openCache  = {};
 const _closeCache = {};
 
+const drawCardFrame = (ctx, frame, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  if (!frame) return;
+  if (frame.naturalWidth >= 1000) {
+    ctx.drawImage(frame, 0, 0, w, h);
+  } else {
+    ctx.drawImage(frame, 8, 9, 668, 932,
+      166 / 1000 * w, 234 / 1400 * h,
+      668 / 1000 * w, 932 / 1400 * h);
+  }
+};
+
 // 4 pages: 0-1 photos, 2-3 text
 const PAGES = [
   {
@@ -187,10 +199,7 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
           const canvas = canvasRef.current;
           const ctx = canvas.getContext('2d');
           const finalFrame = _openCache[themeKey][_openCache[themeKey].length - 1];
-          if (finalFrame) {
-            ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-            ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-          }
+          if (finalFrame) drawCardFrame(ctx, finalFrame, CARD_WIDTH, CARD_HEIGHT);
         }
         return;
       }
@@ -230,10 +239,7 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const finalFrame = openResults[openResults.length - 1];
-        if (finalFrame) {
-          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-          ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-        }
+        if (finalFrame) drawCardFrame(ctx, finalFrame, CARD_WIDTH, CARD_HEIGHT);
       }
     };
 
@@ -252,10 +258,7 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
     canvas.style.height = `${CARD_HEIGHT}px`;
     ctx.scale(dpr, dpr);
     const firstFrame = imagesRef.current[0];
-    if (firstFrame) {
-      ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-      ctx.drawImage(firstFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-    }
+    if (firstFrame) drawCardFrame(ctx, firstFrame, CARD_WIDTH, CARD_HEIGHT);
   }, [isLoaded]);
 
   // Open animation loop
@@ -274,18 +277,12 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
     const drawFrame = () => {
       if (isCompleteRef.current) {
         const finalFrame = imagesRef.current[totalFrames];
-        if (finalFrame) {
-          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-          ctx.drawImage(finalFrame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-        }
+        if (finalFrame) drawCardFrame(ctx, finalFrame, CARD_WIDTH, CARD_HEIGHT);
         if (!isClosing) setShowContent(true);
         return;
       }
       const frame = imagesRef.current[currentFrameRef.current];
-      if (frame) {
-        ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-        ctx.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-      }
+      if (frame) drawCardFrame(ctx, frame, CARD_WIDTH, CARD_HEIGHT);
     };
 
     drawFrame();
@@ -362,24 +359,14 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
         lastCloseFrameTimeRef.current = timestamp;
 
         const frame = frames[closeFrameRef.current];
-        if (frame) {
-          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-          ctx.drawImage(frame, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-        }
+        if (frame) drawCardFrame(ctx, frame, CARD_WIDTH, CARD_HEIGHT);
 
         if (closeFrameRef.current < frames.length - 1) {
           closeFrameRef.current++;
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          if (fromGrid) {
-            canvas.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
-            canvas.style.transform = 'scale(0.05)';
-            canvas.style.opacity = '0';
-            setTimeout(() => onClose(), 350);
-          } else {
-            setIsScalingDown(true);
-            setTimeout(() => onClose(), 400);
-          }
+          setIsScalingDown(true);
+          setTimeout(() => onClose(), 400);
         }
       } else {
         animationRef.current = requestAnimationFrame(animate);
@@ -408,8 +395,8 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
 
       <canvas
         ref={canvasRef}
-        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}`}
-        style={{ ...(!isScalingDown && fromGrid ? { animation: 'none' } : {}), position: 'relative', zIndex: 1 }}
+        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}${!isScalingDown && fromGrid ? ' card-canvas--open-from-collect' : ''}`}
+        style={{ position: 'relative', zIndex: 1 }}
       />
 
       {showContent && (

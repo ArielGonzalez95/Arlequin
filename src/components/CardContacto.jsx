@@ -69,6 +69,18 @@ const _postSendCache = {};
 const _closeCache    = {};
 const _btnCache      = {};
 
+const drawCardFrame = (ctx, frame, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  if (!frame) return;
+  if (frame.naturalWidth >= 1000) {
+    ctx.drawImage(frame, 0, 0, w, h);
+  } else {
+    ctx.drawImage(frame, 8, 9, 668, 932,
+      166 / 1000 * w, 234 / 1400 * h,
+      668 / 1000 * w, 932 / 1400 * h);
+  }
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, preload = false, isLowEnd = false, prefersReducedMotion = false }) {
   const canvasRef         = useRef(null);
@@ -252,7 +264,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     canvas.style.height = `${CARD_HEIGHT}px`;
     ctx.scale(dpr, dpr);
     const first = openImagesRef.current[0];
-    if (first) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(first, 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+    if (first) drawCardFrame(ctx, first, CARD_WIDTH, CARD_HEIGHT);
   }, [isLoaded]);
 
   // ── Main animation loop ──────────────────────────────────────────────────────
@@ -273,7 +285,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
     canvas.style.transform = '';
 
     // Draw first frame immediately
-    if (frames[0]) { ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT); ctx.drawImage(frames[0], 0, 0, CARD_WIDTH, CARD_HEIGHT); }
+    if (frames[0]) drawCardFrame(ctx, frames[0], CARD_WIDTH, CARD_HEIGHT);
 
     const handleVisibility = () => {
       if (!document.hidden) lastTimeRef.current = 0;
@@ -290,10 +302,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
         lastTimeRef.current = timestamp;
         const idx = frameIdxRef.current;
         const img = frames[idx];
-        if (img) {
-          ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-          ctx.drawImage(img, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-        }
+        if (img) drawCardFrame(ctx, img, CARD_WIDTH, CARD_HEIGHT);
 
         if (idx < frames.length - 1) {
           frameIdxRef.current++;
@@ -303,15 +312,8 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
           if (animPhase === 'opening')  { setAnimPhase('fixedForm');    setShowContent(true); }
           if (animPhase === 'postSend') { setAnimPhase('fixedGracias'); setShowGracias(true); }
           if (animPhase === 'closing')  {
-            if (fromGrid) {
-              canvas.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
-              canvas.style.transform = 'scale(0.05)';
-              canvas.style.opacity = '0';
-              setTimeout(() => onClose(), 350);
-            } else {
-              setIsScalingDown(true);
-              setTimeout(() => onClose(), 400);
-            }
+            setIsScalingDown(true);
+            setTimeout(() => onClose(), 400);
           }
         }
       } else {
@@ -580,8 +582,7 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
 
       <canvas
         ref={canvasRef}
-        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}`}
-        style={!isScalingDown && fromGrid ? { animation: 'none' } : undefined}
+        className={`card-canvas${isScalingDown ? ' card-canvas--exiting' : ''}${!isScalingDown && fromGrid ? ' card-canvas--open-from-collect' : ''}`}
       />
 
       {showGracias && (

@@ -84,6 +84,53 @@
   }
 }
 
+/* ── Dorso bridge ──────────────────────────────────────────────────
+   A single grid-card-sized dorso shown at center between the close
+   animation ending and CDA's deck becoming visible. Sized to match
+   the grid card at each breakpoint (mirrors GridStage.css values).
+   ─────────────────────────────────────────────────────────────────*/
+.dorso-bridge {
+  position: absolute;
+  /* The grid center sits slightly below the 50% mark due to escudo clearance.
+     On desktop: (padding-top − padding-bottom) / 2 ≈ 53px below center.
+     Using a fixed offset keeps it close without per-breakpoint recalculation. */
+  top: calc(50% + 54px);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 237px;   /* (490px max-width − 16px gap) / 2 */
+  aspect-ratio: 3 / 4;
+  border-radius: 8px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 6; /* above CDA, below card detail */
+}
+
+.dorso-bridge img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+}
+
+@media (max-height: 780px) and (min-width: 501px) {
+  .dorso-bridge { width: 190px; } /* (396−16)/2 */
+}
+@media (max-width: 768px) and (min-width: 501px) {
+  .dorso-bridge { width: 212px; } /* (440−16)/2 */
+}
+@media (max-width: 500px) {
+  .dorso-bridge { width: 181px; top: calc(50% + 26px); } /* (370−8)/2; reduced offset on mobile */
+}
+@media (max-width: 430px) {
+  .dorso-bridge { width: 164px; top: calc(50% + 18px); } /* (336−8)/2 */
+}
+@media (max-width: 390px) {
+  .dorso-bridge { width: 150px; top: calc(50% + 15px); } /* (306−6)/2 */
+}
+@media (max-width: 360px) {
+  .dorso-bridge { width: 137px; top: calc(50% + 13px); } /* (280−6)/2 */
+}
+
 /* ── Mobile tall (iPhone 13/14/15): bajar animación para clearar el escudo */
 @media (max-width: 430px) and (min-height: 700px) {
   .mask-content {

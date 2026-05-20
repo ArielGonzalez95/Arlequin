@@ -3,17 +3,21 @@ import { _dorsoCached } from './GridStage';
 import './CardDealAnimation.css';
 
 const GROW_DURATION = 600;
-const FLY_DURATION  = 500;
-const FLY_STAGGER   = 60;
+const FLY_DURATION  = 420;
+const FLY_STAGGER   = 120;
 
-function CardDealAnimation({ isDarkMode, onDealComplete }) {
+function CardDealAnimation({ isDarkMode, onDealComplete, skipGrow = false }) {
   const gridRef     = useRef(null);
   const themeSuffix = isDarkMode ? 'dark' : 'clear';
 
   // half-step between cards in each axis — computed from DOM
   const [offsets, setOffsets] = useState(null);
   // init → growing → dealing
-  const [phase, setPhase] = useState('init');
+  // When skipGrow is true (close-from-card handoff), we start at 'growing-end'
+  // so the deck is already at full grid size and visible at center, then go
+  // straight to the deal — avoids the "card shrinks to nothing then grows
+  // back" effect when returning from a card detail.
+  const [phase, setPhase] = useState(skipGrow ? 'growing-end' : 'init');
 
   // Mark _dorsoCached so GridStage mounts synchronously loaded (no flash)
   const handleImgLoad = () => { _dorsoCached[themeSuffix] = true; };
@@ -33,28 +37,46 @@ function CardDealAnimation({ isDarkMode, onDealComplete }) {
     });
   }, []);
 
-  // Animation sequence: init → growing → dealing → onDealComplete
+  // Animation sequence:
+  //   Normal mount  : init → growing → dealing → onDealComplete
+  //   skipGrow mount: growing-end → dealing → onDealComplete (no shrink/grow)
   useEffect(() => {
     if (!offsets) return;
     let raf1, raf2, t1, t2;
-    // 2 RAFs: ensure init frame is painted before transition starts
-    raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        setPhase('growing');
-        t1 = setTimeout(() => {
-          setPhase('dealing');
-          // last card finishes at FLY_DURATION + stagger * 3; buffer = 80ms
-          t2 = setTimeout(onDealComplete, FLY_DURATION + FLY_STAGGER * 3 + 80);
-        }, GROW_DURATION + 50);
+
+    if (skipGrow) {
+      // 2 RAFs to paint the "growing-end" frame (deck at center), then a
+      // Brief pause so the stacked deck is visible before cards fly out.
+      // The canvas exits via card-exit-scale (380ms) and onClose fires at
+      // 400ms, so CDA mounts right as the canvas disappears at grid-card size.
+      // A 150ms beat shows the deck at center before the deal begins.
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => {
+          t1 = setTimeout(() => {
+            setPhase('dealing');
+            t2 = setTimeout(onDealComplete, FLY_DURATION + FLY_STAGGER * 3 + 80);
+          }, 150);
+        });
       });
-    });
+    } else {
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => {
+          setPhase('growing');
+          t1 = setTimeout(() => {
+            setPhase('dealing');
+            t2 = setTimeout(onDealComplete, FLY_DURATION + FLY_STAGGER * 3 + 80);
+          }, GROW_DURATION + 50);
+        });
+      });
+    }
+
     return () => {
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [offsets, onDealComplete]);
+  }, [offsets, onDealComplete, skipGrow]);
 
   const getCardStyle = (index) => {
     if (!offsets) return { opacity: 0 };
@@ -65,40 +87,56 @@ function CardDealAnimation({ isDarkMode, onDealComplete }) {
     //   card 1 (top-right)    → translate(-hw, +hh)
     //   card 2 (bottom-left)  → translate(+hw, -hh)
     //   card 3 (bottom-right) → translate(-hw, -hh)
-    const dx  = index % 2 === 0 ?  hw : -hw;
-    const dy  = index < 2        ?  hh : -hh;
-    const rot = index % 2 === 0 ? -8  :  8;  // arc direction
+    const dx = index % 2 === 0 ?  hw : -hw;
+    const dy = index < 2        ?  hh : -hh;
 
     if (phase === 'init') {
       return {
         opacity: 0,
-        transform: `translateX(${dx}px) translateY(${dy}px) scale(0.05) rotate(0deg)`,
+        transform: `translateX(${dx}px) translateY(${dy}px) scale(0.05)`,
         transition: 'none',
+        zIndex: 4 - index,
         willChange: 'transform, opacity',
       };
     }
 
     if (phase === 'growing') {
+      // All 4 cards stacked at center, growing together → visually appears as a
+      // single card emerging at full size. zIndex keeps card 0 on top of the deck.
       return {
         opacity: 1,
-        transform: `translateX(${dx}px) translateY(${dy}px) scale(1) rotate(0deg)`,
+        transform: `translateX(${dx}px) translateY(${dy}px) scale(1)`,
         transition: `transform ${GROW_DURATION}ms cubic-bezier(0.34, 1.56, 0.64, 1),
                      opacity 300ms ease-out`,
+        zIndex: 4 - index,
         willChange: 'transform, opacity',
       };
     }
 
-    if (phase === 'dealing') {
+    if (phase === 'growing-end') {
+      // skipGrow: deck already at full size at center, no transition. Used when
+      // CardDealAnimation mounts to pick up from a card-detail close — the
+      // detail canvas has just finished its flip-to-dorso and shrunk to grid
+      // size at center, so we mount in that exact state.
       return {
-        '--deal-dx':  `${dx}px`,
-        '--deal-dy':  `${dy}px`,
-        '--deal-rot': `${rot}deg`,
-        animationName:           'deal-fly-out',
-        animationDuration:       `${FLY_DURATION}ms`,
-        animationTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        animationDelay:          `${index * FLY_STAGGER}ms`,
-        animationFillMode:       'both',
-        willChange:              'transform',
+        opacity: 1,
+        transform: `translateX(${dx}px) translateY(${dy}px) scale(1)`,
+        transition: 'none',
+        zIndex: 4 - index,
+        willChange: 'transform',
+      };
+    }
+
+    if (phase === 'dealing') {
+      // OLD style: cards leave the stack one by one with 120 ms stagger, no arc.
+      // Card 0 (top of stack) flies first; card 3 (bottom) flies last and lands
+      // last. Matches the original GridStage runDeal(false) cadence the user
+      // preferred — feels like an actual deal rather than a fan.
+      return {
+        transform: 'translate(0px, 0px) scale(1)',
+        transition: `transform ${FLY_DURATION}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${index * FLY_STAGGER}ms`,
+        zIndex: 4 - index,
+        willChange: 'transform',
       };
     }
 
