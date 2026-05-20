@@ -278,20 +278,39 @@
    - 1280×720 @ 100% → 1280×720px CSS
 */
 
-/* Short desktop / laptop (≤780px tall, ≥501px wide): single responsive
-   scale that interpolates with viewport height. The 300px subtrahend
-   reserves enough for the escudo at its largest in this range (ends y=143
-   between 721–780px height) plus the footer and breathing room. Clamped
-   so the card never grows above natural size or shrinks below 0.50.
-   Examples (height → scale → visual top → escudo bottom → clearance):
-     780 → 0.706 → 150 → 143 →  7px
-     720 → 0.618 → 150 → 116 → 34px  (escudo shrinks ≤720)
-     692 → 0.576 → 150 → 116 → 34px  (1536×864 @125%)
-     614 → 0.462 → clamped → top 150 → clearance ample
-     580 → 0.500 → clamped → top 120 → clears 116 by 4px */
+/* Short desktop / laptop scaling. Hardcoded discrete steps (CSS scale()
+   requires unitless numbers, so we can't use a viewport-height calc()
+   inside clamp()). Each step is tuned against the matching smaller
+   escudo in breakpoints.css. */
+
+/* 721–780px tall: escudo ends y=122 (12+110). */
 @media (max-height: 780px) and (min-width: 501px) {
   .card-que-es-arlequin {
-    transform: scale(clamp(0.50, calc((100vh - 300px) / 680), 1));
+    transform: scale(0.70);
+    transform-origin: center center;
+  }
+}
+
+/* 651–720px tall (1229×692 notebook target): escudo ends y=96 (8+88). */
+@media (max-height: 720px) and (min-width: 501px) {
+  .card-que-es-arlequin {
+    transform: scale(0.60);
+    transform-origin: center center;
+  }
+}
+
+/* 581–650px tall: escudo ends y=84 (8+76). */
+@media (max-height: 650px) and (min-width: 501px) {
+  .card-que-es-arlequin {
+    transform: scale(0.55);
+    transform-origin: center center;
+  }
+}
+
+/* ≤580px tall: escudo ends y=74 (6+68). */
+@media (max-height: 580px) and (min-width: 501px) {
+  .card-que-es-arlequin {
+    transform: scale(0.50);
     transform-origin: center center;
   }
 }
