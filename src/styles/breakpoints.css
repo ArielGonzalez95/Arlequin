@@ -99,6 +99,17 @@
   }
 }
 
+/* ── Notebook 1229×692 (1536×864 @125%) and similar ≤720px tall ──────── */
+@media (max-height: 720px) and (min-width: 431px) {
+  :root {
+    --escudo-height:     72px;
+    --escudo-img-height: 106px;        /* 72 × 1.4677 */
+    --escudo-top:        10px;
+    --escudo-clearance:  136px;        /* 10 + 106 + 20 */
+    --footer-clearance:   66px;
+  }
+}
+
 /* ── Very short desktop ≤650px tall, ≥431px wide ──────────────────────  */
 @media (max-height: 650px) and (min-width: 431px) {
   :root {

@@ -278,10 +278,19 @@
    - 1280×720 @ 100% → 1280×720px CSS
 */
 
-/* 1229×692 — notebook at 125% (1536×864 physical) */
+/* Short desktop ≤780px tall (laptops with taskbar / scaled DPI) */
 @media (max-height: 780px) and (min-width: 501px) {
   .card-que-es-arlequin {
     transform: scale(0.80);
+    transform-origin: center center;
+  }
+}
+
+/* 1229×692 — notebook at 125% (1536×864 physical). Scale tuned so the
+   canvas top clears the (smaller) escudo at this height range. */
+@media (max-height: 720px) and (min-width: 501px) {
+  .card-que-es-arlequin {
+    transform: scale(0.62);
     transform-origin: center center;
   }
 }
