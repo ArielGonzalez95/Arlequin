@@ -46,16 +46,16 @@ function CardDealAnimation({ isDarkMode, onDealComplete, skipGrow = false }) {
 
     if (skipGrow) {
       // 2 RAFs to paint the "growing-end" frame (deck at center), then a
-      // pause before dealing out. The pause must be long enough that the
-      // dorso bridge in ArlequinMaskSystem has faded out (bridge hold=200ms +
-      // fade=200ms = 400ms total), so both transitions end simultaneously and
-      // the user sees a single smooth handoff rather than two overlapping animations.
+      // Brief pause so the stacked deck is visible before cards fly out.
+      // The canvas exits via card-exit-scale (380ms) and onClose fires at
+      // 400ms, so CDA mounts right as the canvas disappears at grid-card size.
+      // A 150ms beat shows the deck at center before the deal begins.
       raf1 = requestAnimationFrame(() => {
         raf2 = requestAnimationFrame(() => {
           t1 = setTimeout(() => {
             setPhase('dealing');
             t2 = setTimeout(onDealComplete, FLY_DURATION + FLY_STAGGER * 3 + 80);
-          }, 420);
+          }, 150);
         });
       });
     } else {

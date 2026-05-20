@@ -312,17 +312,8 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
           if (animPhase === 'opening')  { setAnimPhase('fixedForm');    setShowContent(true); }
           if (animPhase === 'postSend') { setAnimPhase('fixedGracias'); setShowGracias(true); }
           if (animPhase === 'closing')  {
-            if (fromGrid) {
-              canvas.style.transition = 'transform 0.2s ease-in, opacity 0.2s ease-in';
-              setTimeout(() => {
-                canvas.style.transform = 'translateZ(0) scale(0.1)';
-                canvas.style.opacity = '0';
-                setTimeout(() => onClose(), 200);
-              }, 0);
-            } else {
-              setIsScalingDown(true);
-              setTimeout(() => onClose(), 400);
-            }
+            setIsScalingDown(true);
+            setTimeout(() => onClose(), 400);
           }
         }
       } else {

@@ -54,11 +54,6 @@ function ArlequinMaskSystem({
   // 'close': collect → mask close (escudo click).
   // 'openCard': collect → open card detail (grid card click).
   const [collectPurpose, setCollectPurpose] = useState('close');
-  // Dorso bridge: small grid-card-sized dorso shown at center during the
-  // gap between close animation end and CDA deck becoming visible.
-  const [dorsoBridgeVisible, setDorsoBridgeVisible] = useState(false);
-  const [dorsoBridgeFading, setDorsoBridgeFading] = useState(false);
-  const dorsoBridgeTimerRef = useRef(null);
   const pendingCardStageRef = useRef(false);
 
   useEffect(() => {
@@ -132,7 +127,6 @@ function ArlequinMaskSystem({
 
   useEffect(() => () => {
     if (dealLingerTimerRef.current) clearTimeout(dealLingerTimerRef.current);
-    if (dorsoBridgeTimerRef.current) clearTimeout(dorsoBridgeTimerRef.current);
   }, []);
 
   // Handle NO click - close and reopen mask before showing card detail
@@ -205,23 +199,9 @@ function ArlequinMaskSystem({
     setCardFromGrid(false);
     setDealMode(wasFromGrid ? 'fromCardClose' : 'initial');
     setStage(STAGES.DEALING);
-
-    if (wasFromGrid) {
-      // Show a grid-card-sized dorso at center to bridge the gap between
-      // the canvas disappearing and CDA's deck becoming visible (~200ms mount).
-      if (dorsoBridgeTimerRef.current) clearTimeout(dorsoBridgeTimerRef.current);
-      setDorsoBridgeVisible(true);
-      setDorsoBridgeFading(false);
-      // Start fading at 200ms, complete fade at 400ms — aligns with CDA
-      // starting its deal (~200ms after mount with skipGrow=true).
-      dorsoBridgeTimerRef.current = setTimeout(() => {
-        setDorsoBridgeFading(true);
-        dorsoBridgeTimerRef.current = setTimeout(() => {
-          setDorsoBridgeVisible(false);
-          setDorsoBridgeFading(false);
-        }, 200);
-      }, 200);
-    }
+    // No bridge needed: the canvas now exits via card-exit-scale (380ms) which
+    // shrinks to ~grid-card size before onClose fires, so CDA mounts at the
+    // same apparent size — seamless hand-off without a visible size jump.
   }, [cardFromGrid]);
 
   // Handle go-to-contact from CardQueEsArlequin last page
@@ -324,23 +304,6 @@ function ArlequinMaskSystem({
               onCollectComplete={handleCollectComplete}
               purpose={collectPurpose}
             />
-          )}
-          {/* Dorso bridge: covers the ~200ms gap between close animation end and
-              CDA deck appearing. Sized to match a grid card so the visual
-              transition from "close → small card at center → deal" is seamless. */}
-          {dorsoBridgeVisible && (
-            <div
-              className={`dorso-bridge${isDarkMode ? ' dark' : ''}`}
-              style={{
-                opacity: dorsoBridgeFading ? 0 : 1,
-                transition: dorsoBridgeFading ? 'opacity 0.2s ease-out' : 'none',
-              }}
-            >
-              <img
-                src={`/Cartas/00000_arlequin_dorso_${isDarkMode ? 'dark' : 'clear'}.avif`}
-                alt=""
-              />
-            </div>
           )}
           {renderStageContent()}
         </div>

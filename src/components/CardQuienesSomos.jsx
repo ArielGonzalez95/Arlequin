@@ -365,17 +365,8 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
           closeFrameRef.current++;
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          if (fromGrid) {
-            canvas.style.transition = 'transform 0.2s ease-in, opacity 0.2s ease-in';
-            setTimeout(() => {
-              canvas.style.transform = 'translateZ(0) scale(0.1)';
-              canvas.style.opacity = '0';
-              setTimeout(() => onClose(), 200);
-            }, 0);
-          } else {
-            setIsScalingDown(true);
-            setTimeout(() => onClose(), 400);
-          }
+          setIsScalingDown(true);
+          setTimeout(() => onClose(), 400);
         }
       } else {
         animationRef.current = requestAnimationFrame(animate);

@@ -378,22 +378,11 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
           closeFrameRef.current++;
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          {
-            if (fromGrid) {
-              // Quick scale-down + fade (200ms), then hand off to the
-              // dorso bridge in ArlequinMaskSystem which shows a
-              // grid-card-sized dorso before the deal animation starts.
-              canvas.style.transition = 'transform 0.2s ease-in, opacity 0.2s ease-in';
-              setTimeout(() => {
-                canvas.style.transform = 'translateZ(0) scale(0.1)';
-                canvas.style.opacity = '0';
-                setTimeout(() => onClose(), 200);
-              }, 0);
-            } else {
-              setIsScalingDown(true);
-              setTimeout(() => onClose(), 400);
-            }
-          }
+          // card-exit-scale (380ms) shrinks to ~0.49 of canvas CSS size ≈ grid
+          // card size, then fades. CDA mounts at the same apparent size so the
+          // hand-off is seamless with no visible size jump.
+          setIsScalingDown(true);
+          setTimeout(() => onClose(), 400);
         }
       } else {
         animationRef.current = requestAnimationFrame(animate);
