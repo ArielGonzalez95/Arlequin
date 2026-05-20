@@ -201,7 +201,7 @@
     padding-bottom: var(--footer-clearance, 64px);
   }
   .cards-grid {
-    max-width: 353px;
+    max-width: 290px;
   }
   .card-text-overlay {
     font-size: 15px;
@@ -216,7 +216,7 @@
     padding-bottom: var(--footer-clearance, 58px);
   }
   .cards-grid {
-    max-width: 332px;
+    max-width: 260px;
   }
   .card-text-overlay {
     font-size: 14px;

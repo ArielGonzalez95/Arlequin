@@ -91,10 +91,10 @@
 /* ── Short desktop/laptop ≤780px tall, ≥431px wide ──────────────────── */
 @media (max-height: 780px) and (min-width: 431px) {
   :root {
-    --escudo-height:     88px;
-    --escudo-img-height: 129px;        /* 88 × 1.4677 */
-    --escudo-top:        14px;
-    --escudo-clearance:  163px;        /* 14 + 129 + 20 */
+    --escudo-height:     75px;
+    --escudo-img-height: 110px;        /* 75 × 1.4677 */
+    --escudo-top:        12px;
+    --escudo-clearance:  142px;        /* 12 + 110 + 20 */
     --footer-clearance:   68px;
   }
 }
@@ -102,29 +102,32 @@
 /* ── Notebook 1229×692 (1536×864 @125%) and similar ≤720px tall ──────── */
 @media (max-height: 720px) and (min-width: 431px) {
   :root {
-    --escudo-height:     72px;
-    --escudo-img-height: 106px;        /* 72 × 1.4677 */
-    --escudo-top:        10px;
-    --escudo-clearance:  136px;        /* 10 + 106 + 20 */
-    --footer-clearance:   66px;
+    --escudo-height:     60px;
+    --escudo-img-height:  88px;        /* 60 × 1.4677 */
+    --escudo-top:         8px;
+    --escudo-clearance: 116px;         /* 8 + 88 + 20 */
+    --footer-clearance:  66px;
   }
 }
 
 /* ── Very short desktop ≤650px tall, ≥431px wide ──────────────────────  */
 @media (max-height: 650px) and (min-width: 431px) {
   :root {
-    --escudo-height:     72px;
-    --escudo-img-height: 106px;        /* 72 × 1.4677 */
-    --escudo-top:        10px;
-    --escudo-clearance:  136px;        /* 10 + 106 + 20 */
-    --footer-clearance:   64px;
+    --escudo-height:     52px;
+    --escudo-img-height:  76px;        /* 52 × 1.4677 */
+    --escudo-top:         8px;
+    --escudo-clearance: 104px;         /* 8 + 76 + 20 */
+    --footer-clearance:  64px;
   }
 }
 
 /* ── Extremely short ≤580px tall, ≥431px wide ──────────────────────────  */
 @media (max-height: 580px) and (min-width: 431px) {
   :root {
-    --escudo-clearance:  128px;        /* 10 + 106 + 12 */
-    --footer-clearance:   58px;
+    --escudo-height:     46px;
+    --escudo-img-height:  68px;        /* 46 × 1.4677 */
+    --escudo-top:         6px;
+    --escudo-clearance:  94px;         /* 6 + 68 + 20 */
+    --footer-clearance:  58px;
   }
 }
