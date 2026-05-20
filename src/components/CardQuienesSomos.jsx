@@ -80,11 +80,7 @@ const _closeCache = {};
 const drawCardFrame = (ctx, frame, w, h) => {
   ctx.clearRect(0, 0, w, h);
   if (!frame) return;
-  if (frame.naturalWidth >= 1000) {
-    ctx.drawImage(frame, 166, 234, 668, 932, 0, 0, w, h);
-  } else {
-    ctx.drawImage(frame, 0, 0, w, h);
-  }
+  ctx.drawImage(frame, 0, 0, w, h);
 };
 
 // 4 pages: 0-1 photos, 2-3 text

@@ -84,19 +84,11 @@ const getDpr = () => Math.min(
 const _openCache  = {};
 const _closeCache = {};
 
-// Frames 00001-00023 have a 1000×1400 container with 56% padding; the visible
-// card sits at offset (166,234) with size 668×932. Frame 00000 (dorso) uses a
-// 684×950 container with only 4% padding. Using 9-arg drawImage clips the
-// large-container frames so the visible card fills the canvas at the same
-// apparent size as the dorso, eliminating the jump when the card flips.
+// Consolidates clearRect + drawImage so call sites stay one-liners.
 const drawCardFrame = (ctx, frame, w, h) => {
   ctx.clearRect(0, 0, w, h);
   if (!frame) return;
-  if (frame.naturalWidth >= 1000) {
-    ctx.drawImage(frame, 166, 234, 668, 932, 0, 0, w, h);
-  } else {
-    ctx.drawImage(frame, 0, 0, w, h);
-  }
+  ctx.drawImage(frame, 0, 0, w, h);
 };
 
 const cardTexts = [
