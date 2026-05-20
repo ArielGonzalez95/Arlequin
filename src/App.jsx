@@ -29,12 +29,11 @@ function App() {
   const [phase, setPhase] = useState(ANIMATION_PHASE.HOME);
   const { isLowEnd, prefersReducedMotion } = useLowEndDevice();
 
-  // Pause background + toggle RAF loops once the mask has opened and the user
-  // is interacting with content. The card stack and grid animations need the
-  // main thread; ambient star canvases drawing in parallel are the difference
-  // between a 60-FPS click→expand and a janky one on mobile. The background
-  // is barely visible during these stages anyway.
-  const ambientPaused = phase === ANIMATION_PHASE.CONTENT_VISIBLE;
+  // Pause ambient star canvases on mobile only: the main thread is shared with
+  // card animations and constrained GPUs feel the difference. Desktop has enough
+  // headroom to keep the background running continuously.
+  const isMobileDevice = navigator.maxTouchPoints > 0 && !window.matchMedia('(hover: hover)').matches;
+  const ambientPaused = isMobileDevice && phase === ANIMATION_PHASE.CONTENT_VISIBLE;
 
   useEffect(() => {
     localStorage.setItem(THEME_STORAGE_KEY, isDarkMode ? 'dark' : 'light');
