@@ -112,9 +112,8 @@
 }
 
 @keyframes card-exit-scale {
-  0%   { opacity: 1;   transform: scale(1);    }
-  80%  { opacity: 1;   transform: scale(0.49); }  /* grid card size ≈ 223/450 */
-  100% { opacity: 0;   transform: scale(0.48); }
+  0%   { opacity: 1; transform: scale(1);    }
+  100% { opacity: 1; transform: scale(0.49); } /* grid card size ≈ 223/450 — hold opacity so CDA covers the canvas without a fade gap */
 }
 
 @keyframes fade-in {
