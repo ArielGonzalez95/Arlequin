@@ -9,6 +9,10 @@
   pointer-events: none;
 }
 
+/* Seamless infinite scroll: track is exactly 2× the viewport with two
+   identical images filling it. Animating translateX 0 → -50% advances
+   the track by exactly one image; at restart the position visually
+   matches the start because both halves are identical. */
 .footer-banner-track {
   display: flex;
   width: 200%;
@@ -17,11 +21,10 @@
 }
 
 .footer-banner-image {
-  width: calc(50% - 40px);
+  width: 50%;
   height: 100%;
   object-fit: contain;
   object-position: center;
-  margin-right: 40px;
 }
 
 @keyframes scroll-left {
@@ -40,9 +43,4 @@
     transform: scale(1.4);
     transform-origin: bottom center;
   }
-  .footer-banner-image {
-    width: calc(140% - 40px);
-  }
 }
-
-
