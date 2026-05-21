@@ -177,6 +177,24 @@
   }
 }
 
+/* Notebook 1229×692 and similar — cards-grid sized so 2 rows fit between
+   escudo and footer at 651–720px heights. Padding-top trimmed 10px so the
+   centred grid shifts up 5px (user fine-tuning request). */
+@media (max-height: 720px) and (min-width: 501px) {
+  .grid-stage {
+    padding: 6px;
+    padding-top: calc(var(--escudo-clearance, 138px) - 10px);
+    padding-bottom: var(--footer-clearance, 66px);
+  }
+  .cards-grid {
+    max-width: 363px;
+  }
+  .card-text-overlay {
+    font-size: 16px;
+    -webkit-text-stroke: 0;
+  }
+}
+
 @media (max-height: 650px) and (min-width: 501px) {
   .grid-stage {
     padding: 6px;
@@ -184,7 +202,7 @@
     padding-bottom: var(--footer-clearance, 64px);
   }
   .cards-grid {
-    max-width: 353px;
+    max-width: 290px;
   }
   .card-text-overlay {
     font-size: 15px;
@@ -199,7 +217,7 @@
     padding-bottom: var(--footer-clearance, 58px);
   }
   .cards-grid {
-    max-width: 332px;
+    max-width: 260px;
   }
   .card-text-overlay {
     font-size: 14px;
