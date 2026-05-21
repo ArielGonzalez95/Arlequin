@@ -107,6 +107,13 @@
     --escudo-top:         8px;
     --escudo-clearance: 138px;         /* 8 + 110 + 20 */
     --footer-clearance:  66px;
+  }
+}
+
+/* Mask spread: only tighten on desktop short notebooks. Mobile (≤600)
+   keeps its own --mask-open-distance from the width-based breakpoints. */
+@media (max-height: 720px) and (min-width: 601px) {
+  :root {
     --mask-open-distance: 140px;
   }
 }
