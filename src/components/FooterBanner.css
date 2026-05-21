@@ -9,9 +9,11 @@
   z-index: 50;
   pointer-events: none;
   /* Seamless infinite scroll: the banner (16076×552, aspect 29.123) is tiled
-     horizontally at element height, then background-position-x animates by
-     exactly one tile width (height × 16076/552) so the loop point is invisible.
-     No gaps, no jump. */
+     horizontally then background-position-x animates by exactly one tile width
+     so the loop point is invisible — no gaps, no jump.
+     Desktop: tile at element height (auto 100%), one tile = height × 16076/552.
+     Mobile: the whole strip is fit to width (100% auto, very short) like the
+     old object-fit:contain did, one tile = the viewport width. */
   background-repeat: repeat-x;
   background-size: auto 100%;
   background-position: 0 center;
@@ -31,7 +33,14 @@
 
 @media (max-width: 500px) {
   .footer-banner {
+    background-size: 100% auto;          /* fit whole strip to width (thin) */
     transform: scale(1.4);
     transform-origin: bottom center;
+    animation-name: footer-scroll-mobile;
   }
+}
+
+@keyframes footer-scroll-mobile {
+  from { background-position-x: 0; }
+  to   { background-position-x: -100vw; }
 }
