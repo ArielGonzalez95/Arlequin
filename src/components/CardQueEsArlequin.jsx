@@ -415,7 +415,7 @@ function CardQueEsArlequin({ isDarkMode, onClose, onCloseStart, fromGrid = false
       />
 
       {showNavIcons && (
-        <div className="card-text-container">
+        <div className={`card-text-container${isLastPage ? ' arlequin-text-last' : ''}`}>
           <div className={`card-text ${!isDarkMode ? 'card-text--clear' : ''}`}>
             {cardTexts[currentCardIndex].map((paragraph, index) => (
               <p key={index} className="card-text-paragraph">

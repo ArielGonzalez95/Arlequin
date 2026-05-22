@@ -257,6 +257,17 @@
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
+.arlequin-text-last {
+  left: 17%;
+  top: 35%;
+  transform: none;
+  text-align: center;
+}
+
+.arlequin-text-last .card-text-paragraph {
+  text-align: center;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────
    Scale the entire component so every absolute-positioned child
    (canvas, title, text, nav buttons) shrinks proportionally.

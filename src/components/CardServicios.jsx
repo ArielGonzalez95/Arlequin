@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import './CardQueEsArlequin.css';
+import './CardServicios.css';
 
 // Open animation frames
 const CARD_FRAMES_CLEAR = [
@@ -441,7 +442,7 @@ function CardServicios({ isDarkMode, onClose, onCloseStart, fromGrid = false, pr
       />
 
       {showNavIcons && (
-        <div className="card-text-container">
+        <div className={`card-text-container${isLastPage ? ' servicios-text-last' : ''}`}>
           <div className={`card-text ${!isDarkMode ? 'card-text--clear' : ''}`}>
             {cardTexts[currentCardIndex].map((line, i) => (
               <div

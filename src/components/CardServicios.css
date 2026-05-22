@@ -64,6 +64,17 @@
   max-width: 300px;
 }
 
+.servicios-text-last {
+  left: 19%;
+  top: 40%;
+  transform: none;
+  text-align: center;
+}
+
+.servicios-text-last .card-text-line {
+  text-align: center;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
