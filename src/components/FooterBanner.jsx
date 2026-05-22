@@ -1,30 +1,20 @@
-import { useEffect, useRef } from 'react';
 import './FooterBanner.css';
 
 function FooterBanner({ isDarkMode }) {
-  const bannerRef = useRef(null);
-  
+  const src = isDarkMode
+    ? '/Cartas/arlequin_banner_zocalo_dark.avif'
+    : '/Cartas/arlequin_banner_zocalo_clear.avif';
+
   return (
     <div className="footer-banner">
-      <div className="footer-banner-track">
-        <img
-          src={isDarkMode ? '/Cartas/arlequin_banner_zocalo_dark.avif' : '/Cartas/arlequin_banner_zocalo_clear.avif'}
-          alt="Footer banner"
-          className="footer-banner-image"
-          loading="lazy"
-          decoding="async"
-        />
-        <img
-          src={isDarkMode ? '/Cartas/arlequin_banner_zocalo_dark.avif' : '/Cartas/arlequin_banner_zocalo_clear.avif'}
-          alt="Footer banner"
-          className="footer-banner-image"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
+      <div
+        className="footer-banner-scroll"
+        style={{ backgroundImage: `url(${src})` }}
+        role="img"
+        aria-label="Footer banner"
+      />
     </div>
   );
 }
 
 export default FooterBanner;
-

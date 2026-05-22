@@ -9,30 +9,45 @@
   pointer-events: none;
 }
 
-.footer-banner-track {
-  display: flex;
-  width: 200%;
+/* A wide layer with the banner tiled via background-repeat. We animate it with
+   transform: translateX (GPU-composited) instead of background-position (a paint
+   op that re-samples the scaled image every frame and causes a sub-pixel
+   shimmer/vibration). Translating by exactly one tile width loops seamlessly
+   because the repeated pattern is identical after the shift.
+   Mobile tile = (280vw - 40px): mirrors main's old element width
+   (calc(140% - 40px) of a 200vw track) so the strip keeps its ~36px height.
+   Desktop tile = 55 × 16076/552 = 1601.77px: the strip fit to the 55px height. */
+.footer-banner-scroll {
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 100%;
-  animation: scroll-left 30s linear infinite;
+  width: 400%;
+  background-repeat: repeat-x;
+  background-position: 0 center;
+  background-size: calc(280vw - 40px) auto;
+  animation: footer-scroll-mobile 30s linear infinite;
+  will-change: transform;
 }
 
-.footer-banner-image {
-  width: calc(50% - 40px);
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  margin-right: 40px;
-}
-
-@keyframes scroll-left {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+@keyframes footer-scroll-mobile {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(calc(40px - 280vw), 0, 0); }
 }
 
 @media (min-width: 501px) {
   .footer-banner {
     height: 55px;
   }
+  .footer-banner-scroll {
+    background-size: auto 100%;
+    animation-name: footer-scroll-desktop;
+  }
+}
+
+@keyframes footer-scroll-desktop {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(calc(55px * -16076 / 552), 0, 0); }
 }
 
 @media (max-width: 500px) {
@@ -40,9 +55,4 @@
     transform: scale(1.4);
     transform-origin: bottom center;
   }
-  .footer-banner-image {
-    width: calc(140% - 40px);
-  }
 }
-
-
