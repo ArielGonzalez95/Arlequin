@@ -125,6 +125,11 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
 
   const theme = isDarkMode ? 'dark' : 'clear';
 
+  // Mirror animPhase in a ref so the async frame-load callback can read the
+  // current phase without re-subscribing the preload effect to it.
+  const animPhaseRef = useRef(animPhase);
+  animPhaseRef.current = animPhase;
+
   // ── Handlers ────────────────────────────────────────────────────────────────
   const handleClose = () => {
     if (animPhase === 'closing' || isHidingUI) return;
@@ -238,6 +243,17 @@ function CardContacto({ isDarkMode, onClose, onCloseStart, fromGrid = false, pre
       openImagesRef.current     = openRes;
       postSendImagesRef.current = postRes;
       closeImagesRef.current    = closeRes;
+
+      // When the theme toggles while the card is parked on a static frame, the
+      // main animation loop is idle and won't repaint — redraw the matching
+      // last frame in the new theme so the fixed card updates immediately.
+      const phase = animPhaseRef.current;
+      if ((phase === 'fixedForm' || phase === 'fixedGracias') && canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        const frames = phase === 'fixedForm' ? openRes : postRes;
+        const frame = frames[frames.length - 1];
+        if (frame) drawCardFrame(ctx, frame, CARD_WIDTH, CARD_HEIGHT);
+      }
 
       if (!preload) setIsLoaded(true);
     };
