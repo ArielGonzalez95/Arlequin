@@ -434,7 +434,7 @@ function CardQuienesSomos({ isDarkMode, onClose, onCloseStart, fromGrid = false,
               </div>
             </>
           ) : (
-            <div className="card-text-container">
+            <div className="card-text-container quienes-somos-text-container">
               {/* Always white text since card background is always dark */}
               <div className="card-text quienes-somos-card-text">
                 {currentPage.lines.map((line, index) => (

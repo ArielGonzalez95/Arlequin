@@ -67,4 +67,11 @@
 
 .quienes-somos-card-text .card-text-line {
   font-size: 23px;
+  text-align: center;
+}
+
+.quienes-somos-text-container {
+  left: 19%;
+  top: 40%;
+  transform: none;
 }
