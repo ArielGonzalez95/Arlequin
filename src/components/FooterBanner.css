@@ -7,36 +7,47 @@
   overflow: hidden;
   z-index: 50;
   pointer-events: none;
+}
+
+/* A wide layer with the banner tiled via background-repeat. We animate it with
+   transform: translateX (GPU-composited) instead of background-position (a paint
+   op that re-samples the scaled image every frame and causes a sub-pixel
+   shimmer/vibration). Translating by exactly one tile width loops seamlessly
+   because the repeated pattern is identical after the shift.
+   Mobile tile = (280vw - 40px): mirrors main's old element width
+   (calc(140% - 40px) of a 200vw track) so the strip keeps its ~36px height.
+   Desktop tile = 55 × 16076/552 = 1601.77px: the strip fit to the 55px height. */
+.footer-banner-scroll {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 400%;
   background-repeat: repeat-x;
   background-position: 0 center;
-  /* Seamless infinite scroll: tile the banner (16076×552, aspect 29.123)
-     horizontally and animate background-position-x by exactly one tile width
-     so the loop is invisible — no gap, no jump.
-     Mobile default replicates main's old size: the element width was
-     calc(140% - 40px) of a 200vw track = (280vw - 40px), and object-fit:contain
-     fit the very wide strip to that WIDTH (≈36px tall). We mirror that with
-     background-size: (280vw - 40px) auto and scroll one tile of that width. */
   background-size: calc(280vw - 40px) auto;
   animation: footer-scroll-mobile 30s linear infinite;
+  will-change: transform;
 }
 
 @keyframes footer-scroll-mobile {
-  from { background-position-x: 0; }
-  to   { background-position-x: calc(40px - 280vw); }
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(calc(40px - 280vw), 0, 0); }
 }
 
 @media (min-width: 501px) {
   .footer-banner {
     height: 55px;
-    /* Desktop: main fit the strip to the 55px element height (auto 100%). */
+  }
+  .footer-banner-scroll {
     background-size: auto 100%;
     animation-name: footer-scroll-desktop;
   }
 }
 
 @keyframes footer-scroll-desktop {
-  from { background-position-x: 0; }
-  to   { background-position-x: calc(55px * -16076 / 552); }
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(calc(55px * -16076 / 552), 0, 0); }
 }
 
 @media (max-width: 500px) {

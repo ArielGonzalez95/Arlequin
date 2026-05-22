@@ -6,12 +6,14 @@ function FooterBanner({ isDarkMode }) {
     : '/Cartas/arlequin_banner_zocalo_clear.avif';
 
   return (
-    <div
-      className="footer-banner"
-      style={{ backgroundImage: `url(${src})` }}
-      role="img"
-      aria-label="Footer banner"
-    />
+    <div className="footer-banner">
+      <div
+        className="footer-banner-scroll"
+        style={{ backgroundImage: `url(${src})` }}
+        role="img"
+        aria-label="Footer banner"
+      />
+    </div>
   );
 }
 
